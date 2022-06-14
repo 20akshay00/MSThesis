@@ -9,16 +9,15 @@ def get_bloch_spectrum(V0, kl, q, l_max):
 
 def to_pos_basis(phi_l, kl, l_max):
     l = np.arange(-l_max, l_max+1)
-    return lambda x: (1/np.sqrt(2 * np.pi)) * np.sum(phi_l * np.exp(2j * kl * x * l))
+    return lambda x: np.sum(phi_l * np.exp(2j * kl * x * l))
     
 def func_bloch(psi, q_ind, band_num, kl, l_max):
     return to_pos_basis(psi[q_ind, band_num], kl, l_max)
 
 def func_wannier(bloch_fn, k, R):
-    N = len(k)
     def func(x):
         bloch_vals = np.array([fn(x) for fn in bloch_fn])
-        return 1/np.sqrt(N) * np.sum(bloch_vals * np.exp(1j * k * (x - R)), axis = 0)
+        return 1/len(k) * np.sum(bloch_vals * np.exp(1j * k * (x - R)), axis = 0)
 
     return func
 
@@ -33,7 +32,8 @@ if __name__ == "__main__":
 
     V0, kl, l_max, num_q = args.V0, args.k, args.l_max, args.num_q #potential depth, period
 
-    q = np.linspace(-np.pi, np.pi, num_q)
+    #q is in real units, psi = psi(x) not psi(x/a), E is in units of E_R
+    q = np.linspace(-kl, kl, num_q)
     psi = np.empty((len(q), 2 * l_max + 1, 2 * l_max + 1), dtype = np.complex128)
     E = np.empty((len(q), 2 * l_max + 1))
 
