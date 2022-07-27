@@ -7,6 +7,7 @@ using InteractiveUtils
 # ╔═╡ 280e53b0-f5eb-11ec-2b12-536d5b58b7ec
 begin
 	using Plots, PlutoUI, LinearAlgebra, QuadGK, FFTW, HypertextLiteral, LaTeXStrings
+	using HCubature
 	theme(:dracula)
 	gr()
 end
@@ -60,26 +61,35 @@ begin
 		return res
 	end
 	
-	Vd(k, n) = norm(k) > 0 ? ((dot(k, n))^2/sum(k .* k) - 1/3) : 0
+	Vd(k, n) = norm(k) > 0 ? ((dot(k, n)^2)/dot(k, k) - 1/3) : 0
 
 	# defines position grid; N-points in [-L/2, L/2]
-	function dipole_potential(inds, wannier, n_d, N, L)	
-		# discrete spacing in real space and k-space
-		dx = L/N
-		dk = 1/(N * dx) #1/L
+	# function dipole_potential(inds, wannier, n_d, N, L)	
+	# 	# discrete spacing in real space and k-space
+	# 	dx = L/N
+	# 	dk = 2π * 1/(N * dx) #1/L
 	
-		# generate grid
-		x = dx .* (-N÷2:(N÷2 - 1))
-		k = dk .* (-N÷2:(N÷2 - 1))
+	# 	# generate grid
+	# 	x = dx .* (-N÷2:(N÷2 - 1))
+	# 	k = dk .* (-N÷2:(N÷2 - 1))
 				
-		w_il = [bfft(conj.(wannier[i].(x .- inds[1][i])) .* wannier[i].(x .- inds[4][i])) for i in 1:3]
-		w_jk = [fft(conj.(wannier[i].(x .- inds[2][i])) .* wannier[i].(x .- inds[3][i])) for i in 1:3]
+	# 	w_il = [fftshift(fft(conj.(wannier[i].(x .- inds[1][i])) .* wannier[i].(x .- inds[4][i]))) |> reverse for i in 1:3]
+	# 	w_jk = [fftshift(fft(conj.(wannier[i].(x .- inds[2][i])) .* wannier[i].(x .- inds[3][i]))) for i in 1:3]
+		
+	# 	res = sum(Iterators.product(1:length(k), 1:length(k), 1:length(k))) do (l, m, n)
+	# 		prod(w_il[1][l] * w_il[2][m] * w_il[3][n]) * Vd([k[l], k[m], k[n]], n_d) * (w_il[1][l] * w_il[2][m] * w_il[3][n]) 
+	# 	end
 
-		res = sum(Iterators.product(1:length(k), 1:length(k), 1:length(k))) do (l, m, n)
-			prod(w_il[1][l] * w_il[2][m] * w_il[3][n]) * Vd([k[l], k[m], k[n]], n_d) * (w_il[1][l] * w_il[2][m] * w_il[3][n]) 
-		end
+	# 	return res * (dx ^ 2 * dk) ^ 3 * (1/2π) ^ 3
+	# end
 
-		return res * (dx ^ 2)
+	function dipole_potential(inds, wannier, n_d)
+		w_il(r) = prod(wannier[i](r[i] - inds[1][i]) .* wannier[i](r[i] - inds[4][i]) for i in 1:3)
+		w_jk(r) = prod(wannier[i](r[i] - inds[2][i]) .* wannier[i](r[i] - inds[3][i]) for i in 1:3)
+		V(r1, r2) = (1 - 3 * (dot(n_d, r1 .- r2)^2)/dot(r1 .- r2, r1 .- r2))/(norm(r1 .- r2)^3) 
+
+		integrand(r) = w_il(r[1:3]) * V(r[1:3], r[4:6]) * w_jk(r[4:6])
+		return hcubature(integrand, -5 * ones(6), 5 * ones(6))[1]
 	end
 end
 
@@ -100,38 +110,52 @@ end
 begin
 	kl = π
 	l_max = 10
-	q = range(start = -kl, stop = kl, length = 100)
+	q = range(start = -kl, stop = kl, length = 300)
 	
-	V = range(start = 0., stop = 30., length = 20)
+	V = range(start = 3., stop = 30., length = 20)
 	
 	Vcontact = Array{Float64}(undef, length(V))
 	Vdipole = Array{ComplexF64}(undef, length(V))
 	hopping = Array{Float64}(undef, length(V))
 	
-	for (i, V0) in enumerate(V)
+	Threads.@threads for (i, V0) in collect(enumerate(V))
 		wannier_x, Ex = get_wannier(V0, kl, l_max, q)
 		wannier_y, Ey = get_wannier(1000, kl, l_max, q)
 		wannier_z, Ez = get_wannier(1000, kl, l_max, q)
 
 		hopping[i] = tunneling([[0, 0, 0], [1, 1, 1]], [Ex, Ey, Ez], [q, q, q])
 	    Vcontact[i] = contact_potential([[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [wannier_x, wannier_y, wannier_z]) |> real
-		Vdipole[i] = dipole_potential([[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [wannier_x, wannier_y, wannier_z], [1, 0, 0], 300., 10.)
+		Vdipole[i] = dipole_potential([[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]], [wannier_x, wannier_y, wannier_z], [1, 0, 0]) |> real
 	end
+end
+
+# ╔═╡ 333cb807-f6ff-4c46-b12e-0b0f8bd0096b
+begin
+	aₛ = -21 # in bohr radii
+	a = 180 # in nm
+	
+	a_d = 130 # dipole length in bohr radii; m * u0 * um^2 / 12 pi hbar
+	
+	contact_factor = (8 * aₛ * 0.0529)/(π * a)
+	dipole_factor = (6 * a_d * 0.0529)/(π^2 * a)
 end
 
 # ╔═╡ 24665d16-e524-474f-9274-d367757dba17
 begin
 	p1 = plot(V, hopping, st = :scatter, xlabel = L"V/E_r", ylabel = L"J/E_r", title = "N.N. hopping", label = "", framestyle = :box, titlefontfamily = "serif-roman", c = "#FCD851", markerstrokewidth = 0)
 	
-	p2 = plot(V, -Vcontact, st = :scatter, xlabel = L"V/E_r", ylabel = L"V_c/E_r", title = "Onsite contact potential", label = "", framestyle = :box, titlefontfamily = "Computer Modern", c = "#FCD851", markerstrokewidth = 0, ylim = [minimum(-Vcontact), 0])
+	p2 = plot(V, contact_factor * Vcontact, st = :scatter, xlabel = L"V/E_r", ylabel = L"V_c/E_r", title = "Onsite contact potential", label = "", framestyle = :box, titlefontfamily = "Computer Modern", c = "#FCD851", markerstrokewidth = 0, ylim = [minimum(contact_factor * Vcontact), 0])
+
+	p3 = plot(V, dipole_factor * real.(Vdipole), st = :scatter, xlabel = L"V/E_r", ylabel = L"V_d/E_r", title = "Onsite dipole potential", label = "", framestyle = :box, titlefontfamily = "Computer Modern", c = "#FCD851", markerstrokewidth = 0)
 	
-	plot(p1, p2, layout = (1, 2), size = (1000, 400), bottommargin = 4Plots.mm, leftmargin = 6Plots.mm)
+	plot(p1, p2, p3, layout = (1, 3), size = (1000, 250), bottommargin = 4Plots.mm, leftmargin = 6Plots.mm)
 end
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
 [deps]
 FFTW = "7a1cc6ca-52ef-59f5-83cd-3a7055c09341"
+HCubature = "19dc6840-f33b-545b-b366-655c7e3ffd49"
 HypertextLiteral = "ac1192a8-f4b3-4bfe-ba22-af5b92cd3ab2"
 LaTeXStrings = "b964fa9f-0449-5b57-a5c2-d3ea65f4040f"
 LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
@@ -141,6 +165,7 @@ QuadGK = "1fd47b50-473d-5c70-9696-f719f8f3bcdc"
 
 [compat]
 FFTW = "~1.5.0"
+HCubature = "~1.5.0"
 HypertextLiteral = "~0.9.4"
 LaTeXStrings = "~1.3.0"
 Plots = "~1.31.1"
@@ -229,6 +254,11 @@ deps = ["ColorTypes", "FixedPointNumbers", "Reexport"]
 git-tree-sha1 = "417b0ed7b8b838aa6ca0a87aadf1bb9eb111ce40"
 uuid = "5ae59095-9a9b-59fe-a467-6f913c188581"
 version = "0.12.8"
+
+[[deps.Combinatorics]]
+git-tree-sha1 = "08c8b6831dc00bfea825826be0bc8336fc369860"
+uuid = "861a8166-3701-5b0c-9a16-15d98fcdc6aa"
+version = "1.0.2"
 
 [[deps.Compat]]
 deps = ["Dates", "LinearAlgebra", "UUIDs"]
@@ -392,6 +422,12 @@ version = "1.3.14+0"
 git-tree-sha1 = "53bb909d1151e57e2484c3d1b53e19552b887fb2"
 uuid = "42e2da0e-8278-4e71-bc24-59509adca0fe"
 version = "1.0.2"
+
+[[deps.HCubature]]
+deps = ["Combinatorics", "DataStructures", "LinearAlgebra", "QuadGK", "StaticArrays"]
+git-tree-sha1 = "134af3b940d1ca25b19bc9740948157cee7ff8fa"
+uuid = "19dc6840-f33b-545b-b366-655c7e3ffd49"
+version = "1.5.0"
 
 [[deps.HTTP]]
 deps = ["Base64", "Dates", "IniFile", "Logging", "MbedTLS", "NetworkOptions", "Sockets", "URIs"]
@@ -1128,11 +1164,12 @@ version = "0.9.1+5"
 # ╔═╡ Cell order:
 # ╠═280e53b0-f5eb-11ec-2b12-536d5b58b7ec
 # ╟─cf042dfc-0fcc-4f25-ae21-3a2539d5ec77
-# ╟─a5c0c950-7715-4837-9507-8767db9e6e54
-# ╟─26c604e4-cda7-4eed-a252-844a3b5836af
+# ╠═a5c0c950-7715-4837-9507-8767db9e6e54
+# ╠═26c604e4-cda7-4eed-a252-844a3b5836af
 # ╠═41dd0768-c6dc-454e-876b-7cd6b94fa76a
-# ╠═cbd5be0e-1f7c-462f-aae8-2b6295d216c4
+# ╟─cbd5be0e-1f7c-462f-aae8-2b6295d216c4
 # ╠═531e2326-c027-4108-8965-3bccc9e477ca
+# ╠═333cb807-f6ff-4c46-b12e-0b0f8bd0096b
 # ╠═24665d16-e524-474f-9274-d367757dba17
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002

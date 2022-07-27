@@ -112,7 +112,7 @@ begin
 		<h6>Bloch spectrum options</h6>
 		<ul>
 		$([
-			@htl("<li>q: $(Child(Slider(-pi:0.05:pi, default = 0., show_value = true)))</li>"),
+			@htl("<li>q: $(Child(Slider(-2pi:0.05:2pi, default = 0., show_value = true)))</li>"),
 			@htl("<li>V₀: $(Child(Slider(10:10:1000, default = 100, show_value = true)))</li>"),
 		])
 		</ul>
@@ -123,7 +123,7 @@ end
 
 # ╔═╡ 89baef02-fa5a-4a4d-8abc-8c45eef7ce22
 md"""## Constructing a localized basis set (Wannier functions)
-$$\begin{aligned} w_R(x) &= \frac{1}{\sqrt{N}} \sum_k e^{-iqR}\cdot\psi_q(x)\end{aligned}$$"""
+$$\begin{aligned} w_R(x) = w(x - R) &= \frac{1}{\sqrt{N}} \sum_q e^{-iqR}\cdot\psi_q(x)\end{aligned}$$"""
 
 # ╔═╡ 83da2740-dc38-417b-acce-1a8d7902febf
 begin
@@ -136,7 +136,7 @@ begin
 			<ul>
 			$([
 				@htl("<li>$(labels[1]): $(Child(Slider(0:0.1:500, default = 0., show_value = true)))</li>"),
-				@htl("<li>$(labels[2]): $(Child(Slider(0:0.01:5π, default = π, show_value = true)))</li>"),
+				@htl("<li>$(labels[2]): $(Child(Slider(1:0.01:5π, default = π, show_value = true)))</li>"),
 				@htl("<li>$(labels[3]): $(Child(Slider(1:50, default = 10, show_value = true)))</li>"),
 				@htl("<li>$(labels[4]): $(Child(Slider(2:500, default = 100, show_value = true)))</li>")
 			])
@@ -144,7 +144,7 @@ begin
 			<h6>Wannier function options</h6>
 			<ul>
 			$([
-				@htl("<li>$(labels[5]): $(Child(Slider(-10:0.5:10, default = 0., show_value = true)))</li>")
+				@htl("<li>$(labels[5]): $(Child(Slider(-10:10, default = 0., show_value = true)))</li>")
 				@htl("<li>$(labels[6]): $(Child(Slider(1:50, default = 1, show_value = true)))</li>")
 			])
 			</ul>
@@ -158,6 +158,7 @@ end
 
 # ╔═╡ e677fb41-2d1b-4a07-9f1b-a6a9ae00b1f0
 begin
+	gr()
 	to_pos_basis(phi_l, kl, l_max) = (x) -> sum(phi_l .* exp.(2im .* kl .* x .* (-l_max:l_max)))
 	
 	func_wannier(bloch_fn, k, R) = (x) -> 1/length(k) * sum([fn(x) for fn in bloch_fn] .* exp.(1im .* k .* (x - R)))
@@ -188,9 +189,10 @@ end
 # ╔═╡ 4ae4cd70-df57-4fda-8631-e92722cb984d
 let	
 	gr()
+	theme(:dark)
 	V0, kl = -values_[2], π
 
-	x = range(start = 0, stop = 1, length = 1001)
+	x = range(start = 0, stop = 5, length = 1001)
 	V = V0 .* sin.(kl .* x) .^ 2
 	q, l_max = values_[1], 60
 	
@@ -226,9 +228,9 @@ where, the parameters are defined like so:
 
 $$\boxed{t_{i, j} = \int dr \cdot w^*_{R_i}(r) \cdot \hat{H} \cdot w_{R_j}(r)}$$
 
-$$\boxed{U = -g \int dr \cdot |w_R(r)|^4 \hspace{1cm} \leftarrow \hspace{1cm} g = \frac{4π\hbar^2 a_s}{m}}$$
+$$\boxed{U = g \int dr \cdot |w_R(r)|^4 \hspace{1cm} \leftarrow \hspace{1cm} g = \frac{4π\hbar^2 a_s}{m}}$$
 
- $a_s$ = s-wave scattering length s.t. interaction potential is defined as $V(r) = -g\delta(r)$.
+ $a_s$ = s-wave scattering length s.t. interaction potential is defined as $V(r) = g\delta(r)$.
 """
 
 # ╔═╡ e0d87bd3-99a6-438a-a3c7-3bb29594d6ce
@@ -333,11 +335,11 @@ md"""
 ## 
 \
 
+
 ### Self-consistency
 - To obtain the equilibrium state, we must find the stationary point of the free energy $F$.
 - This results in the self-consistency relation: $\psi = \langle a \rangle$.
 \
-
 """
 
 # ╔═╡ 261ee46e-4bd8-44df-be44-5ad2d0af3da1
@@ -346,8 +348,9 @@ md"""
 """
 
 # ╔═╡ 8b0387a9-b816-43f0-baa2-bee61ea18ba0
-let
+begin
 	plotly()
+	theme(:lime)
 	struct MeanField
 	    n_max :: Int64
 	    a :: Matrix{Float64}
@@ -376,27 +379,32 @@ let
 
 	model = MeanField(10)
 
-	z, size = 2, 200
-	t = range(start = 0, stop = 0.1, length = size)
-	mu = range(start = 0, stop = 3, length = size)
+	z, size_ = 2, 200
+	t = range(start = 0, stop = 0.1, length = size_)
+	mu = range(start = 0, stop = 3, length = size_)
 	
-	order_param = zeros((size, size))
-	num_particles = zeros((size, size))
+	order_param = zeros((size_, size_))
+	num_particles = zeros((size_, size_))
 	
-	for k1 in 1:size, k2 in 1:size
+	for k1 in 1:size_, k2 in 1:size_
 	    order_param[k2, k1] = abs(get_order_parameter(model, t[k1], mu[k2], z))
 	    num_particles[k2, k1] = abs(get_num_particles(model, t[k1], mu[k2], z))
 	end
-	
+end
+
+# ╔═╡ 52aaa5b0-f5d4-4715-a77e-99f515b2af22
+begin
 	theme(:lime)
-	p1 = heatmap(t, mu, order_param)
+	plotly()
+	p12 = heatmap(t, mu, order_param)
 	plot!(
-		colorbar = :none,
 	    ylabel = "μ (chemical potential)",
 	    xlabel = "t (hopping parameter)",
 	    framestyle = :box, 
-	    title = "1-site MFT")	
-	p2 = plot(t, mu, num_particles, st = :surface, color = cgrad(:jet, [0.276, 0.552, 0.828]))
+	    title = "1-site MFT",  
+		colorbar = :none)
+	
+	p22 = plot(t, mu, num_particles, st = :surface, color = cgrad(:jet, [0.276, 0.552, 0.828]))
 	plot!(
 	    xguidefontsize = 8,
 	    yguidefontsize = 8,
@@ -407,10 +415,10 @@ let
 	    framestyle = :box, 
 	    title = "Average Occupation Number / Site",  
 	    cmap = :thermal,
-	    camera = (25, 30),
-		colorbar = :none)
+		colorbar = :none,
+	    camera = (25, 30))
 	
-	plot(p1, p2, layout = (1, 2), size = (950, 400), leftmargin = 5Plots.mm, bottommargin = 5Plots.mm, topmargin = 5Plots.mm, rightmargin = 5Plots.mm)
+	plot(p12, p22, layout = (1, 2), size = (900, 400), leftmargin = 5Plots.mm, bottommargin = 5Plots.mm, topmargin = 5Plots.mm, rightmargin = 5Plots.mm)
 end
 
 # ╔═╡ 5156cca3-8c3c-4444-93f3-1091b076958d
@@ -433,8 +441,10 @@ $$s.t. \hspace{1cm}n_i = max\left\{0, \left[\frac{\mu}{U}\right] + 1\right\}$$
 
 # ╔═╡ 8c89e8c1-65f4-4d0f-8329-501056297765
 let
+	theme(:dark)
+	gr()
 	x = -2π:0.01:2π
-	p1 = plot(x, (x) -> 10 * sin(2x)^2, label = "", ylims = (-1, 12), lw = 2, axis = :none, framestyle = :none, size = (1000, 200))
+	p1 = plot(x, (x) -> 10 * sin(2x)^2, label = "", ylims = (-1, 12), lw = 2, axis = :none, framestyle = :none, size = (950, 200))
 	
 	for x in (π/2 .* (-3:3)) 
 	scatter!([x, x], [1.5, 2.5], markersize = 5, c = :red, markerstrokewidth = 0, label = "")
@@ -470,6 +480,7 @@ end
 # ╔═╡ 6231aa5a-fa54-4487-84c6-049ec1d323bb
 let
 	gr()
+	theme(:dark)
 	x = -10π:0.1:10π
 	f = (x) -> 0.7 * (cos(x)^2 + 0.8 * cos(x + 0.5) + 0.6 * cos(x/2 - 1))
 	
@@ -502,13 +513,13 @@ md"""
 $$H_{BH} = -t\cdot \sum_{\langle i,j \rangle} a_i^{\dagger}a_j + \frac{U}{2} \sum_i n_i(n_i -1) - \mu\sum_i n_i$$
 
 - In the limit $U/t << 1$, we can neglect the potential term.
-$$H_{BH}= -t \sum_{\langle i, j\rangle} b_i^{\dagger}b_j - \mu \sum_i n_i$$
+$$H_{BH}= -t \sum_{\langle i, j\rangle} a_i^{\dagger}a_j - \mu \sum_i n_i$$
 
 - Performing a fourier transform of the hopping operators, we get;
-$$H = \sum_k (\epsilon_k - \mu) \tilde{b}_k^{\dagger}\tilde{b}_k \hspace{1cm} \tilde{b}_k = \frac{1}{\sqrt{N}} \sum_{j=1}^N b_j e^{-ikj} \hspace{1cm} \epsilon_k = -2t\cos k$$
+$$H = \sum_k (\epsilon_k - \mu) \tilde{a}_k^{\dagger}\tilde{a}_k \hspace{1cm} \tilde{a}_k = \frac{1}{\sqrt{N}} \sum_{j=1}^N a_j e^{-ikj} \hspace{1cm} \epsilon_k = -2t\cos k$$
 
 - So, the ground state for a fixed number of particles, $m$, is the state where all particles condense into the $k=0$ state;
-$$\ket{\Psi_{SF}} = \frac{1}{m!} (\tilde{b}^{\dagger}_{k=0})^m \ket{0} \hspace{1cm} \tilde{b}^{\dagger}_{k=0} = \sum_{i=1}^N b_i^{\dagger}$$
+$$\ket{\Psi_{SF}} = \frac{1}{m!} (\tilde{a}^{\dagger}_{k=0})^m \ket{0} \hspace{1cm} \tilde{a}^{\dagger}_{k=0} = \sum_{i=1}^N a_i^{\dagger}$$
 
 This delocalization characterizes the superfluid state.
 """
@@ -524,6 +535,57 @@ let
 	end
 
 	p1
+end
+
+# ╔═╡ 5ee62b08-d509-473a-b04c-3b07cdd6a267
+md"""
+## Intuitively understanding the phase diagram
+\
+"""
+
+# ╔═╡ 5559c00a-c45d-48d5-ae06-055cda73809d
+begin
+	@bind vals PlutoUI.combine() do Child
+		@htl("""
+		<div style="border-style: solid; border-width: 2px; padding: 15px; margin:20px;">
+		<h4>Parameters</h4>
+		<ul>
+		$([
+			@htl("<li>Hopping parameter (t): $(Child(Slider(t, show_value = true, default = 0)))</li>"),
+			@htl("<li>Chemical potential (mu): $(Child(Slider(mu, show_value = true, default = 0)))</li>"),
+		])
+		</ul>
+		</div>""")
+	end
+end
+
+# ╔═╡ 8f07c035-5102-430f-86a2-e207f880b3ea
+let
+	theme(:lime)
+	plotly()
+
+	slider_t, slider_mu = vals
+	p11 = heatmap(t, mu, order_param)
+	plot!(
+		colorbar = :none,
+		ylabel = "μ (chemical potential)",
+		xlabel = "t (hopping parameter)",
+		framestyle = :box, 
+		title = "MFT phase diagram")
+	scatter!([slider_t], [slider_mu], markersize = 6, c = :white, msw= 2, msc = :black, label = "", margin = 5Plots.mm)
+
+	particles = 0:5
+	Egs(mu, n) = 0.5 * n * (n - 1) - mu * n
+	Es = Egs.(slider_mu, particles)
+	get_num(mu_, t_) = num_particles[findall(==(mu_), mu)[1], findall(==(t_), t)[1]]
+	
+	p21 = plot(particles, Es, label = "", lw = 2, st = [:line, :scatter], markersize = 3, framestyle = :box, margin = 5Plots.mm, xlabel = "# particles per site", ylabel = "Energy (U)", title = "A stability-based perspective")
+	N_particles = get_num(slider_mu, slider_t)
+
+	box_col = (count(Es .< minimum(Es) + z * sqrt.(N_particles * (N_particles + 1)) * slider_t) > 1) ? :green : :red
+	plot!(particles, minimum(Es) * ones(length(particles)), fillrange = (minimum(Es) .+ z * sqrt.(N_particles .* (N_particles .+ 1)) .* slider_t .* ones(length(particles))), fillalpha = 0.2, c = box_col, label = "")
+	
+	plot(p11, p21, layout = 2, size = (900, 400))
 end
 
 # ╔═╡ 6d10742a-9cf7-4369-bd62-a9ab2938f4f0
@@ -1766,12 +1828,16 @@ version = "0.9.1+5"
 # ╟─ab7b8a8a-c6e7-4c28-960c-fd74e05ee9a8
 # ╟─5b3b5dba-b5b9-4002-a1f2-185b626df9bc
 # ╟─261ee46e-4bd8-44df-be44-5ad2d0af3da1
+# ╟─52aaa5b0-f5d4-4715-a77e-99f515b2af22
 # ╟─8b0387a9-b816-43f0-baa2-bee61ea18ba0
 # ╟─5156cca3-8c3c-4444-93f3-1091b076958d
 # ╟─8c89e8c1-65f4-4d0f-8329-501056297765
 # ╟─df4a3b07-714c-4b9a-80f4-075c02ad3d78
 # ╟─94166d5a-76b3-4f0c-bf25-43b8044489a9
 # ╟─0557cfd8-c1f8-442c-9ac2-d7db3b6b59ce
+# ╟─5ee62b08-d509-473a-b04c-3b07cdd6a267
+# ╟─8f07c035-5102-430f-86a2-e207f880b3ea
+# ╟─5559c00a-c45d-48d5-ae06-055cda73809d
 # ╟─6d10742a-9cf7-4369-bd62-a9ab2938f4f0
 # ╟─6ca79f9b-a955-476f-be02-795108b82ad5
 # ╟─00000000-0000-0000-0000-000000000001
