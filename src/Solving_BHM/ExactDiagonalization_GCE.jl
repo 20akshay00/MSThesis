@@ -145,17 +145,17 @@ function generate_fock_operator(param, op_func, basis, n_max)
     return blockdiag(ops...)
 end
 
-function get_order_parameter(H, a_op)
-    psi_gs = eigsolve(H, 1, :SR)[2][1]
-    order_param = conj.(psi_gs') * (a_op * psi_gs) / (conj.(psi_gs') * psi_gs)[1]
-    return order_param[1]
-end
-
 # function get_order_parameter(H, a_op)
 #     psi_gs = eigsolve(H, 1, :SR)[2][1]
-#     order_param = (conj.(psi_gs') * a_op * a_op * psi_gs) - (conj.(psi_gs') * a_op * psi_gs) .^ 2
+#     order_param = conj.(psi_gs') * (a_op * psi_gs) / (conj.(psi_gs') * psi_gs)[1]
 #     return order_param[1]
 # end
+
+function get_order_parameter(H, n_op)
+    psi_gs = eigsolve(H, 1, :SR)[2][1]
+    order_param = (conj.(psi_gs') * (n_op * n_op) * psi_gs) - (conj.(psi_gs') * n_op * psi_gs) .^ 2
+    return order_param[1]
+end
 
 function ExactDiagonalization(n_max, num_sites, num_points)
 
@@ -167,17 +167,17 @@ function ExactDiagonalization(n_max, num_sites, num_points)
     basis = vcat(basis...)
     # Hn = generate_number(basis)
     
-    a_op = generate_a(basis, num_sites ÷ 2);
-    # a_op = generate_number_site(basis, 1)
+    # a_op = generate_a(basis, num_sites ÷ 2);
+    n_op = generate_number_site(basis, 1)
 
     t = range(start = 0, stop = 0.4, length = num_points)
     mu = range(start = 0, stop = 3, length = num_points)
 
     order_param = zeros((num_points, num_points))
 
-    Threads.@threads for k1 in 1:num_points
+    for k1 in 1:num_points
         for k2 in 1:num_points
-            order_param[k2, k1] = abs(get_order_parameter((t[k1] * Hk) + Hv - (mu[k2] * Hn), a_op))
+            order_param[k2, k1] = abs(get_order_parameter((t[k1] * Hk) + Hv - (mu[k2] * Hn), n_op))
         end
     end
 
@@ -191,7 +191,7 @@ function ExactDiagonalization(n_max, num_sites, num_points)
 end
 
 function phase_diagram(t, mu, order_param, num_sites)
-    p1 = heatmap(t, mu, order_param)
+    p1 = heatmap(t, mu, order_param, clims = (0, 1))
     plot!(
         ylabel = "μ (chemical potential)",
         xlabel = "t (hopping parameter)",
