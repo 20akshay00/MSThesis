@@ -28,27 +28,21 @@ begin
 	expect(ket, op) = (ket' * op * ket)[1]
 	var(ket, op) = expect(ket, op * op) - (expect(ket, op))^2
 	
-	function get_order_parameter(model, t, mu, U = 1)
-		mu = model.isCanonical ? 0 : mu
-		N = model.isCanonical ? model.N[1][model.keep_sites, :][:, model.keep_sites] : model.N[1]
-		
-		E, psi = eigsolve(-t .* model.Hk .+ U .* model.Hu .- mu .* model.Hn, 1, :SR)
+	function get_order_parameter(model, t, mu, U = 1)		
 
-		return var(psi[1], N)
+		E, psi = eigsolve(-t .* model.Hk .+ U .* model.Hu .- mu .* model.Hn, 1, :SR)
+		return var(psi[1], model.N[1])
 	end
 end
 
 # ╔═╡ 71130990-79c8-436c-a44a-2cbfa82567eb
 begin
 	struct BHM
-	    L :: Int64
+	    Lx :: Int64
+        Ly :: Int64
 	    n_max :: Int64
-	    isCanonical :: Bool
-		isPeriodic :: Bool
-	    dim :: Int64
-	    M :: Float64 
-		keep_sites :: Vector{Bool}
 		
+        # Number operators 
 	    N :: Vector{SparseMatrixCSC{Float64, Int64}}
 
 		# hamiltonian pieces
@@ -60,7 +54,7 @@ begin
 	to1D((i, j), L) = L * (i - 1) + j
 	to2D(i, L) = ((i-1)÷L + 1, mod1(i, L))
 
-	function BHM(L, n_max, isCanonical, isPeriodic, M = 0)
+	function BHM(Lx, Ly, n_max)
 		# # general stuff
 	 #    dim = (n_max + 1)^L
 
@@ -70,13 +64,13 @@ begin
 	    n = a_dag * a
 
 		# construct lattice operators
-	    A = Vector{SparseMatrixCSC{Float64, Int64}}(undef, L * L)
-	    A_dag = Vector{SparseMatrixCSC{Float64, Int64}}(undef, L * L )
-		N = Vector{SparseMatrixCSC{Float64, Int64}}(undef, L * L)
+	    A = Vector{SparseMatrixCSC{Float64, Int64}}(undef, Lx * Ly)
+	    A_dag = Vector{SparseMatrixCSC{Float64, Int64}}(undef, Lx * Ly)
+		N = Vector{SparseMatrixCSC{Float64, Int64}}(undef, Lx * Ly)
 		
-	    create_lattice_op(n_max, L * L, a, A)
-	    create_lattice_op(n_max, L * L, a_dag, A_dag)
-	    create_lattice_op(n_max, L * L, n, N)
+	    create_lattice_op(n_max, Lx * Ly, a, A)
+	    create_lattice_op(n_max, Lx * Ly, a_dag, A_dag)
+	    create_lattice_op(n_max, Lx * Ly, n, N)
 
 		N_tot = reduce(+, N)
 		
@@ -84,43 +78,35 @@ begin
 		dim = size(A[1])[1]
 		Hk, Hu = spzeros(dim, dim), spzeros(dim, dim)
 		Hn = copy(N_tot)
-		l_max = isPeriodic ? L : (L - 1)
 
-		for ind_1d in 1:L^2
-			i, j = to2D(ind_1d, L)
-			nbs = to1D.([(mod1(i + 1, L), j), (i, mod1(j + 1, L))], L)
-			for nb in nbs
-				Hk += (A_dag[ind_1d] * A[nb] + A_dag[nb] * A[ind_1d])
-			end
-		end
+        for (i, j) in zip(1:Lx, 1:Ly)
+            ind = to1D((i, j), Lx)
+            nbs = to1D.((i + 1, j), (i, j + 1), Lx)
+        end
+
+		# for ind_1d in 1:L^2
+		# 	i, j = to2D(ind_1d, L)
+		# 	nbs = to1D.([(mod1(i + 1, L), j), (i, mod1(j + 1, L))], L)
+		# 	for nb in nbs
+		# 		Hk += (A_dag[ind_1d] * A[nb] + A_dag[nb] * A[ind_1d])
+		# 	end
+		# end
 
 		for i in 1:L
 			Hu =  Hu + 0.5 * N[i] * (N[i] - I)
 		end
 
-		# if canonical, find restricted indices
-		keep_sites = []
-		
-		if isCanonical
-			m = LinearAlgebra.diag(N_tot)
-			keep_sites = (m .> (M - 0.5)) .&& (m .< (M + 0.5))
-
-			Hk = Hk[keep_sites, :][:, keep_sites]
-			Hu = Hu[keep_sites, :][:, keep_sites]
-			Hn = Hn[keep_sites, :][:, keep_sites]
-		end
-		
 		# construct the model
-	    return BHM(L, n_max, isCanonical, isPeriodic, dim, M, keep_sites, N, Hk, Hu, Hn)
+	    return BHM(Lx, Ly, n_max, N, Hk, Hu, Hn)
 	end
 end
 
 # ╔═╡ 05d72f8a-c67c-42a4-8037-012265d9a203
-model = BHM(2, 4, false, true, 0);
+model = BHM(2, 1, 4, 0);
 
 # ╔═╡ cd7c5a39-706a-4962-af29-62b1fd91398b
 begin
-	ln = 10
+	ln = 2
 	t = range(start = 0, stop = 0.15, length = ln)
 	mu = range(start = 0, stop = 3., length = ln)
 	
