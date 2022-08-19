@@ -24,10 +24,10 @@ function get_hamiltonian(model :: MeanField, t, mu, U, V, z, params)
     return H 
 end
 
-function get_order_parameter(model, t, mu, U, V, z, init = nothing)
+function get_order_parameter(model, t, mu, U, V, z, init = nothing, depth = 1)
     ground_state((ψₐ, ψᵦ, ρₐ, ρᵦ)) = (eigvecs(get_hamiltonian(model, t, mu, U, V, z, [ψₐ, ψᵦ, ρₐ, ρᵦ]))[:, 1], eigvecs(get_hamiltonian(model, t, mu, U, V, z, [ψᵦ, ψₐ, ρᵦ, ρₐ]))[:, 1])
     
-    params_new = isnothing(init) ? rand(-1000:1000, 4) : init
+    params_new = isnothing(init) ? [0.06642557103017081, 0.2738423972692388, 0.004412356564300489, 0.07498966766349892] : init
     params_old = copy(params_new)
     
     num_iter = 0
@@ -38,12 +38,12 @@ function get_order_parameter(model, t, mu, U, V, z, init = nothing)
 
         println(params_new, num_iter)
 
-        if((norm((params_old .- params_new)./params_old) <= 1e-3)) 
-            return params_new
+        if((norm((params_old .- params_new)) <= 1e-3 * norm(params_old))) 
+            return params_new, depth
         end
         
-        if(num_iter == 2000) 
-            return get_order_parameter(model, t, mu, U, V, z)
+        if(num_iter == 500) 
+            return get_order_parameter(model, t, mu, U, V, z, [params_new[1], params_old[1], params_new[3], params_old[3]], depth + 1)
         end
 
         num_iter += 1
@@ -66,16 +66,7 @@ z, size = 4, 2
 # t = range(start = 0, stop = 0.1, length = size)
 V = range(start = 4, stop = 16, length = size)
 mu = range(start = 0, stop = 20, length = size)
-t = 1
+t = 1/4
 
 # t, mu, U, V, z
-get_order_parameter(model, 0.25, 1.02, 4.0, 0.6, 4)
-# order_param = zeros((size, size, 4))
-# num_particles = zeros((size, size))
-
-# for k1 in 1:size
-#     for k2 in 1:size
-#         order_param[k2, k1, :] .= abs.(get_order_parameter(model, t, mu[k2], V[k1], z))
-#     # num_particles[k2, k1] = abs.(get_num_particles(model, t[k1], mu[k2], V, z))
-#     end
-# end
+get_order_parameter(model, 0.25, 0.6060606060606061, 6.626262626262626, 0.6626262626262627, 4)
