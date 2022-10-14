@@ -1,0 +1,57 @@
+:root{
+  --main-bg-color: #121212;  
+}
+
+div.slide {
+  background-color: var(--main-bg-color);
+  color: white;
+  padding: 60px;
+}
+
+h1, h2, h3, h4, h5, h6, .h1, .h2, .h3, .h4, .h5, .h6 {
+ color: white; 
+}
+
+div.toolbar {
+  background-color: rgba(240,240,240,0.1);
+  color: white;
+}
+
+div.toolbar a:link{
+  color: white;
+}
+
+div.toolbar span {
+  color: white;
+}
+
+div.slidy_toc {
+  border-radius: 10px;
+  background: rgba(81, 81, 81, 0.9);
+  left: auto;
+  top: auto;
+  right: 2em;
+  bottom: 3em;
+  height: 35em;
+}
+
+div.slidy_toc > a:link{
+  color: white;
+}
+
+div.slidy_toc > a:visited{
+  color: white;
+}
+
+div.toc-heading{
+  font-size: 1.5em;
+  color: white;
+}
+
+ul>li {
+  list-style: none;
+}
+
+ul {
+  list-style-type: none;
+}
