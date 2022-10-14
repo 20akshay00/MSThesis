@@ -1,4 +1,4 @@
-using Plots, LinearAlgebra, LaTeXStrings
+using Plots, LinearAlgebra, LaTeXStrings, DataStructures
 
 abstract type BoseHubbardModel end
 
@@ -27,23 +27,43 @@ end
 function get_order_parameter(model, t, mu, U, V, z, init = nothing, depth = 1)
     ground_state((ψₐ, ψᵦ, ρₐ, ρᵦ)) = (eigvecs(get_hamiltonian(model, t, mu, U, V, z, [ψₐ, ψᵦ, ρₐ, ρᵦ]))[:, 1], eigvecs(get_hamiltonian(model, t, mu, U, V, z, [ψᵦ, ψₐ, ρᵦ, ρₐ]))[:, 1])
     
-    params_new = isnothing(init) ? rand(0:100, 4) : init
-    params_old = copy(params_new)
-    
+    init = isnothing(init) ? rand(0:100, 4) : init
+    params = CircularBuffer{Vector{Float64}}(3)
+    push!(params, init)
+
+    tol = 4
     num_iter = 0
+
     while(true)
-        params_old = copy(params_new)
-        psi_gs = ground_state(params_new)
+        psi_gs = ground_state(params[end])
         params_new = [abs(expect(model.a, psi_gs[1])), abs(expect(model.a, psi_gs[2])), expect(model.n, psi_gs[1]), expect(model.n, psi_gs[2])]
+        push!(params, params_new)
 
         println(params_new, num_iter)
 
-        if((norm((params_old .- params_new)) <= 1e-3 * norm(params_old))) 
-            return params_new, depth
+        if((norm((params[end] .- params[end - 1])) <= 1/10^tol)) 
+            return round.(params[end], digits = tol), depth
         end
         
         if(num_iter == 500) 
-            return get_order_parameter(model, t, mu, U, V, z, rand(0:100, 4), depth + 1)
+            if abs(params[1][3] - params[1][4]) <= 1/10^(tol - 1)
+                if ((abs(params[1][3] - params[3][3]) <= 1/10^(tol - 1)) && (abs(params[1][3] - params[2][3]) >= 1/10^(tol - 1)))
+                    res = get_order_parameter(model, t, mu, U, V, z, [params[1][1], params[2][2], params[1][3], params[2][4]], depth + 1)
+
+                elseif abs(params[1][1] .- params[1][2]) <= 1/10^(tol - 1)
+                    res = get_order_parameter(model, t, mu, U, V, z, [params[1][1], params[1][2], params[1][3], 0], depth + 1)
+                else
+                    res = get_order_parameter(model, t, mu, U, V, z, [(params[1][1] .+ params[1][2])/2, (params[1][1] .+ params[1][2])/2, params[1][3], params[1][4]], depth + 1)
+                end
+            else
+                if abs(params[1][1] .- params[1][2]) <= 1/10^(tol - 1)
+                    res = get_order_parameter(model, t, mu, U, V, z, [params[1][1], params[1][2], (params[1][3] + params[2][3])/2, (params[1][4] + params[2][4])/2], depth + 1)
+                else
+                    res = get_order_parameter(model, t, mu, U, V, z, (params[1] .+ params[2]) ./ 2, depth + 1)
+                end
+            end
+
+            return res
         end
 
         num_iter += 1
@@ -69,4 +89,4 @@ mu = range(start = 0, stop = 20, length = size)
 t = 1/4
 
 # t, mu, U, V, z
-get_order_parameter(model, 0.25, 0.6060606060606061, 6.626262626262626, 0.6626262626262627, 4)
+# get_order_parameter(model, 0.25, 0.6060606060606061, 6.626262626262626, 0.6626262626262627, 4)

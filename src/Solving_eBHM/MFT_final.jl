@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.19.11
+# v0.19.13
 
 using Markdown
 using InteractiveUtils
@@ -38,7 +38,11 @@ begin
 	        params_old = copy(params_new)
 	        psi_gs = ground_state(params_new)
 	        params_new = [abs(expect(model.a, psi_gs[1])), abs(expect(model.a, psi_gs[2])), expect(model.n, psi_gs[1]), expect(model.n, psi_gs[2])]
-		
+
+			if params_new[3] > params_new[4]
+				params_new[3], params_new[4] = params_new[4], params_new[3]
+			end
+			
 	        if((norm((params_old .- params_new)) <= 1e-3 * norm(params_old)) || depth == 4) 
 	            return params_new, depth
 	        end
@@ -59,7 +63,7 @@ end
 begin
 	model = MeanField(6)
 	
-	z, num_points = 4, 125
+	z, num_points = 4, 100
 	t = range(start = 0.001, stop = 0.05, length = num_points)
 	mu = range(start = 0, stop = 3, length = num_points)
 	
@@ -67,7 +71,7 @@ begin
 	
 	Threads.@threads for k1 in 1:num_points
 	    for k2 in 1:num_points
-	        tmp = (get_order_parameter(model, t[k1], mu[k2], 1, 0.1, z))
+	        tmp = (get_order_parameter(model, t[k1], mu[k2], 0, 0.05, z))
 	        order_param[k2, k1, :] .= tmp[1]
 	   #      if(tmp[2] == 4)
 	   #          println(t, ", ", mu[k2], ", ", U[k1], ", ", 0.1 * U[k1], ", ", z)
@@ -83,7 +87,7 @@ function get_phases(params)
 
     function identify(ψₐ, ψᵦ, ρₐ, ρᵦ)
         c = 4 # default
-		err = 0.04
+		err = 1e-2
 
         if isapprox(ψₐ, ψᵦ, atol = err)
             if isapprox(ψₐ, 0, atol = err)
@@ -125,11 +129,13 @@ begin
 	
 	phases = heatmap(t, mu, get_phases(order_param), 
 		c = palette([:black, "#02ff00", "#d4d0c8", "#ff0000", :blue]), 
+		# c = palette(["#fbe59b", "#75a5ce", "#e86572", "#7d62a9", :transparent]),
 		title = "eBHM MFT - Phase Diagram",
 	    ylabel = "μ/U",
 	    xlabel = "t/U",
-	    colorbar = true,
-		colorbar_ticks = [0, 1, 2, 3, 4])
+	    colorbar = false,
+		colorbar_ticks = [0, 1, 2, 3, 4],
+		clims = (0,4))
 	
 	l = @layout [
 	    [grid(2, 1)] c{0.5w} [grid(2, 1)]
@@ -149,10 +155,10 @@ end
 # end
 
 # ╔═╡ a25b93c3-95c7-4dba-a44c-ae2c677c007e
-begin
-	plotly()
-	plot(t, mu, (order_param[:, :, 3] .+ order_param[:, :, 4]) ./2, color = cgrad(:thermal, [1, 2, 3]), st = :surface)
-end
+# begin
+# 	plotly()
+# 	plot(t, mu, (order_param[:, :, 3]), color = cgrad(:thermal, [1, 2, 3]), st = :surface)
+# end
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
@@ -344,10 +350,10 @@ uuid = "c87230d0-a227-11e9-1b43-d7ebe4e7570a"
 version = "0.4.1"
 
 [[deps.FFMPEG_jll]]
-deps = ["Artifacts", "Bzip2_jll", "FreeType2_jll", "FriBidi_jll", "JLLWrappers", "LAME_jll", "Libdl", "Ogg_jll", "OpenSSL_jll", "Opus_jll", "Pkg", "Zlib_jll", "libaom_jll", "libass_jll", "libfdk_aac_jll", "libvorbis_jll", "x264_jll", "x265_jll"]
-git-tree-sha1 = "ccd479984c7838684b3ac204b716c89955c76623"
+deps = ["Artifacts", "Bzip2_jll", "FreeType2_jll", "FriBidi_jll", "JLLWrappers", "LAME_jll", "Libdl", "Ogg_jll", "OpenSSL_jll", "Opus_jll", "PCRE2_jll", "Pkg", "Zlib_jll", "libaom_jll", "libass_jll", "libfdk_aac_jll", "libvorbis_jll", "x264_jll", "x265_jll"]
+git-tree-sha1 = "74faea50c1d007c85837327f6775bea60b5492dd"
 uuid = "b22a6f82-2f65-5046-a5b2-351ab43fb4e5"
-version = "4.4.2+0"
+version = "4.4.2+2"
 
 [[deps.FileWatching]]
 uuid = "7b1f6079-737a-58dc-b8bc-7a2ca5c1b5ee"
@@ -727,6 +733,11 @@ version = "1.3.2+0"
 git-tree-sha1 = "85f8e6578bf1f9ee0d11e7bb1b1456435479d47c"
 uuid = "bac558e1-5e72-5ebc-8fee-abe8a469f55d"
 version = "1.4.1"
+
+[[deps.PCRE2_jll]]
+deps = ["Artifacts", "Libdl"]
+uuid = "efcefdf7-47ab-520b-bdef-62a2eaa19f15"
+version = "10.40.0+0"
 
 [[deps.PCRE_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
