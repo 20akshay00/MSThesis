@@ -172,31 +172,68 @@ Solve self-consistently: $\hspace{0.5cm}\Psi_i = \langle \psi_{gs, i}|\hat{a}_i 
 
 <br>
 
+<br>
+
 <center>
 ![](./images/legend.png){width=50%}
 </center>
 
 ## What next?
 
-- Quantum Monte Carlo methods
-    - Variational QMC
-    - Path Integral QMC
-        - Evaluate the partition function $Z = Tr(e^{\beta\hat{H}})$
-        - Finite-temperature results
-        
-- $$\hat{H}_0 = \frac{U}{2} \sum_i n_i(n_i-1) - \mu\sum_in _i \hspace{0.5cm}\Bigg|\hspace{0.5cm} \hat{V} = t\sum_{\langle i, j \rangle} a_i^{\dagger}a_j$$
+### Path Integral QMC
 
-- $$Z \equiv \sum_{m=0}^{\infty} \sum_{i_1,..,i_m} e^{-\beta \epsilon_1} \int_0^{\beta} d\tau_1 \dots \int_0^{\tau_m -1} (e^{-\tau_1\epsilon_1}\langle i_1|V|i_2\rangle e^{\tau_1\epsilon_2})\dots(e^{-\tau_m\epsilon_m}\langle i_m | V|i_1\rangle e^{\tau_m\epsilon_1})$$
-- Evaluate the path integral to arbitrary accuracy.
+<br>
+
+- Evaluate the partition function $Z = Tr(e^{\beta\hat{H}})$.
+
+- $$\begin{align}
+Z &= \sum_{|n_1\rangle} \langle n_1 |\left (e^{\frac{\beta}{M}\hat{H}} \right )^M |n_1 \rangle \\
+&= 
+\lim_{M\to \infty} \ \ \sum_{|n_1\rangle} \langle n_1 |\left (1 + \frac{\beta}{M}\hat{H} \right)^M |n_1 \rangle \\
+&\approx \sum_{\{|n_i\rangle\}} \langle n_1 |\left (1 + i\Delta t\hat{H} \right) |n_2 \rangle \cdot \langle n_2 |\left (1 + i\Delta t\hat{H} \right) |n_3 \rangle \dots \langle n_M |\left (1 + i\Delta t\hat{H} \right) |n_1 \rangle \\
+&\approx \sum_{C_i \in C} w(C_i)
+\end{align}$$
+
+- Map d-dimensional quantum system to (d+1) classical system  ($\beta \rightarrow iM\Delta t$).
+
+- Formulated as a classical system determined by a configuration - string of M basis elements; $C \equiv |n_1 \rangle \rightarrow |n_2 \rangle \rightarrow \dots \rightarrow |n_M \rangle\rightarrow |n_1 \rangle$. 
+
+## Worldline representation
+
+<center>
+![](./images/worldline.png){width=70%}
+</center>
+
+
+<!-- - Quantum Monte Carlo methods -->
+<!--     - Variational QMC -->
+<!--     - Path Integral QMC -->
+<!--         - Evaluate the partition function $Z = Tr(e^{\beta\hat{H}})$ -->
+<!--         - Finite-temperature results -->
+
+<!-- - $$\underbrace{\hat{H}_0 = \frac{U}{2} \sum_i n_i(n_i-1) - \mu\sum_in _i}_{\text{diagonal in } \{|n\rangle\}} \hspace{1cm} \text{and} \hspace{1cm} \underbrace{\hat{V} = t\sum_{\langle i, j \rangle} a_i^{\dagger}a_j}_{\text{off-diagonal in } \{|n\rangle\}}$$ -->
+
+<!-- - $$Z \equiv \sum_{m=0}^{\infty} \sum_{i_1,..,i_m} e^{-\beta \epsilon_1} \int_0^{\beta} d\tau_1 \dots d\tau_m\int_0^{\tau_{m-1}} (e^{-\tau_1\epsilon_1}\langle i_1|V|i_2\rangle e^{\tau_1\epsilon_2})\dots(e^{-\tau_m\epsilon_m}\langle i_m | V|i_1\rangle e^{\tau_m\epsilon_1})$$ -->
+<!-- - Evaluate the path integral to arbitrary accuracy. -->
 
 ## Variational Ansatz - ANN
 
-Ansatz for the wave-function: $\Psi = \sum_{n} \Psi(n) |n\rangle$ such that $\Psi(n)$ is captured by a neural network.
-<center>
-![](./images/ANN.svg){width=35%}
-</center>
+- Ansatz for the wave-function: $\Psi = \sum_{n} \Psi(n) |n\rangle$ such that $\Psi(n)$ is captured by a neural network.
 
-Train the network weights to minimize $\langle \hat{H} \rangle$.
+- <center> ![](./images/ANN.svg){width=35%} </center> 
+
+- Train the network weights to minimize $\langle \hat{H} \rangle$.
+
+
+## Mapping experiment to BHM parameters
+
+<center>
+![](./images/mapping.png){width=100%}
+</center>
+<br>
+<center>
+![](./images/wannier.png){width=100%}
+</center>
 
 ------
 <br>
