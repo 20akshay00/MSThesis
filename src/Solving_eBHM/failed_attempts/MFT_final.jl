@@ -43,7 +43,7 @@ begin
 				params_new[3], params_new[4] = params_new[4], params_new[3]
 			end
 			
-	        if((norm((params_old .- params_new)) <= 1e-3 * norm(params_old)) || depth == 4) 
+	        if((norm((params_old .- params_new)) <= 1e-5 * norm(params_old)) || depth == 4) 
 	            return params_new, depth
 	        end
 	        
@@ -66,7 +66,7 @@ begin
 	z, num_points = 4, 100
 	t = range(start = 0.001, stop = 0.075, length = num_points)
 	mu = range(start = 0, stop = 3, length = num_points)
-	V = 0.17
+	V = 0.23
 	
 	order_param = zeros((num_points, num_points, 4))
 	
@@ -90,20 +90,20 @@ function get_phases(params)
         c = 4 # default
 		err = 1e-2
 
-        if isapprox(ψₐ, ψᵦ, atol = err)
-            if isapprox(ψₐ, 0, atol = err)
-                if isapprox(ρₐ, ρᵦ, atol = err)
-                    c = 0 # MI
-                else 
-                    c = 1 # DW
-                end
-			elseif isapprox(ρₐ, ρᵦ, atol = err)
-                c = 2 # SF
-            end
-		elseif !isapprox(ρₐ, ρᵦ, atol = err)
-            c = 3 # SS
+        if isapprox(ρₐ, ρᵦ, atol = err) # BHM
+			if isapprox(ψₐ, 0, atol = err) 
+				c = 0 # MI
+			else
+				c = 2 # SF
+			end
+		else
+			if isapprox(ψₐ, 0, atol = err) # eBHM
+				c = 1 # DW
+			else 
+				c = 3 # SS
+			end
 		end
-        
+
         return c
     end
     return identify.(vcat([order_param[:, :, i] for i in 1:4])...)
@@ -147,23 +147,6 @@ begin
 	]
 	plot(p[1], p[2], phases, p[3], p[4], size = (1500, 500), layout = l)
 end
-
-# ╔═╡ 3db0cbf2-9d8c-4235-bc3e-8831b63fd7c5
-# begin
-# 	i = 0
-# 	mask = get_phases(order_param) .== 4
-# 	(count(mask),
-# 	order_param[mask, 1][i], 
-# 	order_param[mask, 2][i], 
-# 	order_param[mask, 3][i],
-# 	order_param[mask, 4][i])
-# end
-
-# ╔═╡ a25b93c3-95c7-4dba-a44c-ae2c677c007e
-# begin
-# 	plotly()
-# 	plot(t, mu, (order_param[:, :, 3]), color = cgrad(:thermal, [1, 2, 3]), st = :surface)
-# end
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
@@ -1225,7 +1208,5 @@ version = "0.9.1+5"
 # ╠═0471ccb7-5dcf-4461-85a1-ca0e16e0b6e8
 # ╠═e781c04f-2c62-43a9-8d51-9dd07402b4bd
 # ╠═d1155237-6d97-4b72-93ce-e4bb38728541
-# ╠═3db0cbf2-9d8c-4235-bc3e-8831b63fd7c5
-# ╠═a25b93c3-95c7-4dba-a44c-ae2c677c007e
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002
