@@ -12,6 +12,18 @@ begin
 	theme(:lime)
 end
 
+# ╔═╡ 6d19d999-2c91-47c5-bd23-c97aa7b28ff6
+html"""
+<style>
+	main {
+		margin: 0 auto;
+		max-width: 2000px;
+    	padding-left: max(160px, 10%);
+    	padding-right: max(160px, 10%);
+	}
+</style>
+"""
+
 # ╔═╡ 951cb5d0-5ac4-11ed-36b5-a98ab7fda6cb
 begin
 	abstract type BoseHubbardModel end
@@ -66,21 +78,24 @@ begin
 end
 
 # ╔═╡ 1dbdd15c-165f-4241-a082-c393a5dee59d
+# ╠═╡ disabled = true
+#=╠═╡
 begin
-	model = MeanField(6, [0 4; 4 0])
-	z, num_points = 4, 50
-	t = range(start = 0.001, stop = 0.075, length = num_points)
+	model = MeanField(6, [0 3 3; 3 0 3; 3 3 0])
+	z, num_points = 3, 100
+	t = range(start = 0.001, stop = 0.04, length = num_points)
 	mu = range(start = 0, stop = 3, length = num_points)
-	V = 0.15
+	V = 0.16
 	
 	order_param = zeros((num_points, num_points, model.num_sites * 2))
 	
 	Threads.@threads for k1 in 1:num_points
 	    for k2 in 1:num_points
-	        order_param[k2, k1, :] .= get_order_parameter(model, t[k1], mu[k2], 1., V, z, 1e-5)
+	        order_param[k2, k1, :] .= get_order_parameter(model, t[k1], mu[k2], 1., V, z, 1e-4)
 	    end
 	end
 end
+  ╠═╡ =#
 
 # ╔═╡ 32e1c4ff-37d7-415a-8c5d-c47dc849006a
 function classify(order_params, err = 1e-2)
@@ -107,15 +122,16 @@ function classify(order_params, err = 1e-2)
         return c
     end
 	
-    return identify.(vcat([order_params[:, :, i] for i in 1:last(size(order_params))])...)
+    return mapslices((arr) -> identify(arr...), order_params, dims = 3)[:, :]
 end
 
 # ╔═╡ b13ac546-a302-4f47-990a-d63251c982d2
+#=╠═╡
 begin
 	function phase_diagram(model, t, mu, order_param, err = 1e-2, loc = [0, 0])
 		p = []
 		n = model.num_sites
-		p_names = latexstring.(vcat(repeat(["\\psi_"], n) .* ('`' .+ (1:n)), repeat(["\\rho_"], n) .* ('`' .+ (1:n))))
+		p_names = latexstring.(vcat(repeat(["\\psi_"], n) .* ('@' .+ (1:n)), repeat(["\\rho_"], n) .* ('@' .+ (1:n))))
 		
 		for i in 1:(2 * n)
 			p_temp = (i <= n) ? heatmap(t, mu, order_param[:, :, i], xticks = nothing) : heatmap(t, mu, order_param[:, :, i], c = cgrad(:thermal, [1, 2, 3]), clims = (0, 4), xticks = nothing) 
@@ -130,8 +146,8 @@ begin
 		end
 		
 		phases = heatmap(t, mu, classify(order_param, err), 
-			c = palette([:black, "#02ff00", "#d4d0c8", "#ff0000", :blue]), 
-			# c = palette(["#fbe59b", "#75a5ce", "#e86572", "#7d62a9", :transparent]),
+			# c = palette([:black, "#02ff00", "#d4d0c8", "#ff0000", :blue]), 
+			c = palette(["#fbe59b", "#75a5ce", "#e86572", "#7d62a9", :transparent]),
 			title = "eBHM MFT - Phase Diagram",
 			ylabel = "μ/U",
 			xlabel = "t/U",
@@ -151,9 +167,12 @@ begin
 		plot(p[1:n]..., phases, p[(n+1):end]..., size = ((n + 1) * 500, 1.5 * 500), layout = l)
 	end
 end
+  ╠═╡ =#
 
 # ╔═╡ c0cfddd9-49f5-43ff-b2f6-16af87369fd7
-phase_diagram(model, t, mu, order_param, 1e-2, [0.04, 2.8])
+#=╠═╡
+phase_diagram(model, t, mu, sort(order_param, dims = 3), 0.5e-1, [0.03, 2.8])
+  ╠═╡ =#
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
@@ -1178,11 +1197,12 @@ version = "1.4.1+0"
 """
 
 # ╔═╡ Cell order:
+# ╟─6d19d999-2c91-47c5-bd23-c97aa7b28ff6
 # ╠═1147aace-0140-4f4f-8f07-06c13c56dd71
 # ╠═951cb5d0-5ac4-11ed-36b5-a98ab7fda6cb
 # ╠═1dbdd15c-165f-4241-a082-c393a5dee59d
 # ╠═c0cfddd9-49f5-43ff-b2f6-16af87369fd7
-# ╟─32e1c4ff-37d7-415a-8c5d-c47dc849006a
-# ╟─b13ac546-a302-4f47-990a-d63251c982d2
+# ╠═32e1c4ff-37d7-415a-8c5d-c47dc849006a
+# ╠═b13ac546-a302-4f47-990a-d63251c982d2
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002
