@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.19.11
+# v0.19.13
 
 using Markdown
 using InteractiveUtils
@@ -58,56 +58,102 @@ begin
 end
 
 # ╔═╡ c1d74af5-d79b-4d2a-a154-45dbe2806c5b
-begin
-	theme(:dao)
-	gr(dpi = 500)
-	p1 = heatmap(t, mu, order_param)
-	plot!(
-	    ylabel = "μ/U (chemical potential)",
-	    xlabel = "t/U (hopping parameter)",
-	    framestyle = :box, 
-	    title = "\n1D MFT Phase diagram",  
-	    colorbar_title = "\nOrder Parameter",
-		right_margin = 5Plots.mm,
-		left_margin = 2Plots.mm,
-		bottom_margin = 2Plots.mm,
-		top_margin = 3Plots.mm,
-		xlims = [minimum(t), maximum(t)],
-		ylims = [minimum(mu), maximum(mu)])
+# begin
+# 	theme(:dao)
+# 	gr(dpi = 500)
+# 	p1 = heatmap(t, mu, order_param)
+# 	plot!(
+# 	    ylabel = "μ/U (chemical potential)",
+# 	    xlabel = "t/U (hopping parameter)",
+# 	    framestyle = :box, 
+# 	    title = "\n1D MFT Phase diagram",  
+# 	    colorbar_title = "\nOrder Parameter",
+# 		right_margin = 5Plots.mm,
+# 		left_margin = 2Plots.mm,
+# 		bottom_margin = 2Plots.mm,
+# 		top_margin = 3Plots.mm,
+# 		xlims = [minimum(t), maximum(t)],
+# 		ylims = [minimum(mu), maximum(mu)])
 
-	plot!(t[replace([findlast(==(0), order_param[i, :]) for i in 1:size(order_param)[2]], nothing => 1)], mu, label = "Phase boundary", lw = 2, c = 8, alpha = 0.8, legend = :topright, ls = :dash)
+# 	plot!(t[replace([findlast(==(0), order_param[i, :]) for i in 1:size(order_param)[2]], nothing => 1)], mu, label = "Phase boundary", lw = 2, c = 8, alpha = 0.8, legend = :topright, ls = :dash)
 
-	savefig("MFT_res.png")
-end
+# 	savefig("MFT_res.png")
+# end
 
 # ╔═╡ cd3bfa75-31de-4304-b505-f8a6a94a721f
 p1
 
 # ╔═╡ 9acca9b2-818c-4938-9e95-e87fba3ec628
-begin
-	theme(:dao)
-	gr(dpi = 1000)
-	p2 = plot(t, mu, num_particles, st = :wireframe, color = cgrad(:jet, [0.276, 0.552, 0.828]))
-	plot!(
-		    xguidefontsize = 8,
-		    yguidefontsize = 8,
-		    zguidefontsize = 8,    
-		    zlabel = L"\langle n \rangle",
-		    ylabel = "μ/U",
-		    xlabel = "t/U",
-		    framestyle = :box, 
-		    title = "\n Avg. Occupation per site",  
-		    colorbar_title = "",
-		    cmap = :thermal,
-		    camera = (35, 40),
-			size = (600, 500))
-	plot!(right_margin = -10Plots.mm, top_margin = 3Plots.mm)
+# begin
+# 	theme(:dao)
+# 	gr(dpi = 500)
+# 	p2 = plot(t, mu, num_particles, st = :wireframe, color = cgrad(:jet, [0.276, 0.552, 0.828]))
+# 	plot!(
+# 		    xguidefontsize = 8,
+# 		    yguidefontsize = 8,
+# 		    zguidefontsize = 8,    
+# 		    zlabel = L"\langle n \rangle",
+# 		    ylabel = "μ/U",
+# 		    xlabel = "t/U",
+# 		    framestyle = :box, 
+# 		    title = "\n Avg. Occupation per site",  
+# 		    colorbar_title = "",
+# 		    cmap = :thermal,
+# 		    camera = (35, 40),
+# 			size = (600, 500))
+# 	plot!(right_margin = -10Plots.mm, top_margin = 3Plots.mm)
 
-	savefig("MFT_res2.png")
-end
+# 	savefig("MFT_res2.png")
+# end
 
 # ╔═╡ b2629bc0-5679-48d2-a510-d43445740e0c
 p2
+
+# ╔═╡ f2f635b8-f044-4253-b34a-43434ba65870
+# begin
+# 	theme(:dao)
+# 	gr(dpi = 1000)
+# 	p3 = heatmap(t, mu, order_param)
+# 	plot!(
+# 	    ylabel = "μ/U (chemical potential)",
+# 	    xlabel = "t/U (hopping parameter)",
+# 	    framestyle = :box, 
+# 	    title = "\n1D MFT Phase diagram",  
+# 	    colorbar_title = "\nOrder Parameter",
+# 		right_margin = 5Plots.mm,
+# 		left_margin = 2Plots.mm,
+# 		bottom_margin = 2Plots.mm,
+# 		top_margin = 3Plots.mm,
+# 		xlims = [minimum(t), maximum(t)],
+# 		ylims = [minimum(mu), maximum(mu)])
+
+# 	# integer filling lines
+# 	unzip(a) = map(x->getfield.(a, x), fieldnames(eltype(a)))
+# 	for n in 1:3
+# 		muinds, tinds = map(Tuple, findall(==(1), isapprox.(num_particles, n, atol = 5e-4) .& .! (isapprox.(order_param, 0, atol = 1e-3)))) |> unzip
+# 		plot!(t[tinds], mu[muinds], label = "", lw = 2, c = :black, alpha = 0.8, ls = :dash)
+# 	end
+
+# 	plot!(t[replace([findlast(==(0), order_param[i, :]) for i in 1:size(order_param)[2]], nothing => 1)], mu, label = "Phase boundary", lw = 2, c = 8, alpha = 0.8, legend = :topright, ls = :dash)
+
+# 	# integer filling labels
+# 	annotate!(0.12, 0.2, text(L"\langle n \rangle = 1", :black, :right, 12))
+# 	annotate!(0.12, 1.15, text(L"\langle n \rangle = 2", :black, :right, 12))
+# 	annotate!(0.12, 2.15, text(L"\langle n \rangle = 3", :black, :right, 12))
+
+# 	# MI labels
+# 	annotate!(0.02, 0.5, text("MI-1", :white, :right, 12))
+# 	annotate!(0.02, 1.5, text("MI-2", :white, :right, 12))
+# 	annotate!(0.02, 2.5, text("MI-3", :white, :right, 12))
+
+# 	# gapped phase
+# 	# scatter!([0.04], [0.4], markersize = 3, c = 3, label = "")
+# 	plot!([0.04, 0.04], [0.1, 0.8], arrow=(:closed, 0.5), c = :grey, lw = 1, label="")
+# 	plot!([0.04, 0.04], [0.8, 0.1], arrow=(:closed, 0.5), c = :grey, lw = 1, label="")
+# 	annotate!(0.048, 0.45, text(L"E_g", :grey, :right, 9))
+
+# 	# savefig("MFT.png")
+# end
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
@@ -293,10 +339,10 @@ uuid = "c87230d0-a227-11e9-1b43-d7ebe4e7570a"
 version = "0.4.1"
 
 [[deps.FFMPEG_jll]]
-deps = ["Artifacts", "Bzip2_jll", "FreeType2_jll", "FriBidi_jll", "JLLWrappers", "LAME_jll", "Libdl", "Ogg_jll", "OpenSSL_jll", "Opus_jll", "Pkg", "Zlib_jll", "libaom_jll", "libass_jll", "libfdk_aac_jll", "libvorbis_jll", "x264_jll", "x265_jll"]
-git-tree-sha1 = "ccd479984c7838684b3ac204b716c89955c76623"
+deps = ["Artifacts", "Bzip2_jll", "FreeType2_jll", "FriBidi_jll", "JLLWrappers", "LAME_jll", "Libdl", "Ogg_jll", "OpenSSL_jll", "Opus_jll", "PCRE2_jll", "Pkg", "Zlib_jll", "libaom_jll", "libass_jll", "libfdk_aac_jll", "libvorbis_jll", "x264_jll", "x265_jll"]
+git-tree-sha1 = "74faea50c1d007c85837327f6775bea60b5492dd"
 uuid = "b22a6f82-2f65-5046-a5b2-351ab43fb4e5"
-version = "4.4.2+0"
+version = "4.4.2+2"
 
 [[deps.FileWatching]]
 uuid = "7b1f6079-737a-58dc-b8bc-7a2ca5c1b5ee"
@@ -673,6 +719,11 @@ version = "1.3.2+0"
 git-tree-sha1 = "85f8e6578bf1f9ee0d11e7bb1b1456435479d47c"
 uuid = "bac558e1-5e72-5ebc-8fee-abe8a469f55d"
 version = "1.4.1"
+
+[[deps.PCRE2_jll]]
+deps = ["Artifacts", "Libdl"]
+uuid = "efcefdf7-47ab-520b-bdef-62a2eaa19f15"
+version = "10.40.0+0"
 
 [[deps.PCRE_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
@@ -1151,5 +1202,6 @@ version = "1.4.1+0"
 # ╠═cd3bfa75-31de-4304-b505-f8a6a94a721f
 # ╠═9acca9b2-818c-4938-9e95-e87fba3ec628
 # ╠═b2629bc0-5679-48d2-a510-d43445740e0c
+# ╠═f2f635b8-f044-4253-b34a-43434ba65870
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002
