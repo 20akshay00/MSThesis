@@ -54,7 +54,7 @@ begin
 	
 	expect(op, state) = (conj.(state') * op * state)[1]
 	
-	function get_hamiltonian(model :: MeanField, t, mu, U, V, z, params)
+	function get_hamiltonian(model :: MeanField, t, mu, U, V, params)
 		psiU, rhoU = eachcol(model.unit_cell * params)
 		psi, rho = eachcol(params)
 
@@ -65,10 +65,10 @@ begin
 	    return H 
 	end
 	
-	function get_order_parameter(model, t, mu, U, V, z, atol = 1e-4)
+	function get_order_parameter(model, t, mu, U, V, atol = 1e-4)
 		
 	    function f(params)
-			psi = eigsolve(get_hamiltonian(model, t, mu, U, V, z, reshape(params, :, 2)), 1, :SR)[2][1]
+			psi = eigsolve(get_hamiltonian(model, t, mu, U, V, reshape(params, :, 2)), 1, :SR)[2][1]
 
 			return abs.(expect.([model.a..., model.n...], [psi])) 
 		end
@@ -91,7 +91,7 @@ begin
 	
 	Threads.@threads for k1 in 1:num_points
 	    for k2 in 1:num_points
-	        order_param[k2, k1, :] .= get_order_parameter(model, t[k1], mu[k2], 1., V, z, 1e-4)
+	        order_param[k2, k1, :] .= get_order_parameter(model, t[k1], mu[k2], 1., V, 1e-4)
 	    end
 	end
 end
@@ -158,7 +158,7 @@ begin
 			bottom_margin = 7Plots.mm)
 		
 		if !isnothing(loc)
-			annotate!(loc..., text("zV/U = $(z * V)", :black, :left, 20))
+			annotate!(loc..., text("zV/U = $(model.z * V)", :black, :left, 20))
 		end
 		
 		l = @layout [
