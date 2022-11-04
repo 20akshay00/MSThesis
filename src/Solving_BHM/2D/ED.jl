@@ -94,7 +94,7 @@ begin
 			end
 		end
 
-		for i in 1:L
+		for i in 1:L^2
 			Hu =  Hu + 0.5 * N[i] * (N[i] - I)
 		end
 
