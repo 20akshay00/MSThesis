@@ -1,11 +1,4 @@
-### A Pluto.jl notebook ###
-# v0.19.9
-
-using Markdown
-using InteractiveUtils
-
-# ╔═╡ 4b0f86a0-0daf-11ed-36e0-2d007099c7b4
-using Combinatorics, SparseArrays, KrylovKit, LinearAlgebra, Plots, LaTeXStrings, Optim
+using Combinatorics, SparseArrays, KrylovKit, LinearAlgebra, Optim
 
 
 # ╔═╡ a0915818-c566-4963-91a9-3aad31317608
@@ -103,39 +96,19 @@ begin
 	end
 end
 
-# ╔═╡ f34bc577-d072-4c71-907f-c08f23e1bc18
-model = BHM(4, 4, false, 0);
 
-# ╔═╡ 37ebc92f-7957-41eb-8f5e-1a453d1352ce
-begin 
-	num_points = 100
-	t = range(start = 0, stop = 0.15, length = num_points)
-	mu = range(start = 0., stop = 3., length = num_points)
-	
-	order_param = zeros((4, num_points, num_points))
-
-	for num_sites in [1, 2, 3, 4]
-		model = BHM(num_sites, 4, false, 0);
-		Threads.@threads for k1 in 1:num_points
-			for k2 in 1:num_points
-		    	order_param[num_sites, k2, k1] = abs(get_order_parameter(model, t[k1], mu[k2]))
-			end 
-		end
-	end
-end
-
-begin
-	theme(:lime)
-	plot()
-	for num_sites in 1:4
-		plot!(t[[findlast(<(0.2), order_param[num_sites, i, :]) for i in 1:size(order_param)[2]]], mu, label = "$(num_sites) sites", ls = :dash, lw = 1.25)
-	end
-	plot!(
-	    ylabel = "μ (chemical potential)",
-	    xlabel = "t (hopping parameter)",
-	    title = "Cluster Mean Field Theory (1D)",  
-	    colorbar_title = "\n Order Parameter",
-		framestyle = :box, 
-		size = (550, 500),
-		xlim = (0, 0.15))
-end
+# begin
+# 	theme(:lime)
+# 	plot()
+# 	for num_sites in 1:4
+# 		plot!(t[[findlast(<(0.2), order_param[num_sites, i, :]) for i in 1:size(order_param)[2]]], mu, label = "$(num_sites) sites", ls = :dash, lw = 1.25)
+# 	end
+# 	plot!(
+# 	    ylabel = "μ (chemical potential)",
+# 	    xlabel = "t (hopping parameter)",
+# 	    title = "Cluster Mean Field Theory (1D)",  
+# 	    colorbar_title = "\n Order Parameter",
+# 		framestyle = :box, 
+# 		size = (550, 500),
+# 		xlim = (0, 0.15))
+# end
