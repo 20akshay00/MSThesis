@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.19.13
+# v0.19.14
 
 using Markdown
 using InteractiveUtils
@@ -39,23 +39,23 @@ begin
 end
 
 # ╔═╡ 29836763-e203-4338-9744-dadf4d0a5483
-begin
-	model = MeanField(10)
+# begin
+# 	model = MeanField(10)
 	
-	z, num_points = 2, 100
-	t = range(start = 0, stop = 0.15, length = num_points)
-	mu = range(start = 0, stop = 3, length = num_points)
-	U = 1
+# 	z, num_points = 2, 100
+# 	t = range(start = 0, stop = 0.15, length = num_points)
+# 	mu = range(start = 0, stop = 3, length = num_points)
+# 	U = 1
 	
-	order_param = zeros((num_points, num_points))
-	num_particles = zeros((num_points, num_points))
+# 	order_param = zeros((num_points, num_points))
+# 	num_particles = zeros((num_points, num_points))
 	
-	for k1 in 1:num_points, k2 in 1:num_points
-	    order_param[k2, k1] = abs(get_order_parameter(model, t[k1], U, mu[k2], z))
-	    num_particles[k2, k1] = abs(get_num_particles(model, t[k1], U, mu[k2], z))
-	end
+# 	for k1 in 1:num_points, k2 in 1:num_points
+# 	    order_param[k2, k1] = abs(get_order_parameter(model, t[k1], U, mu[k2], z))
+# 	    num_particles[k2, k1] = abs(get_num_particles(model, t[k1], U, mu[k2], z))
+# 	end
 	
-end
+# end
 
 # ╔═╡ c1d74af5-d79b-4d2a-a154-45dbe2806c5b
 # begin
@@ -155,6 +155,43 @@ p2
 # 	# savefig("MFT.png")
 # end
 
+# ╔═╡ ca518357-aa0d-4741-bda1-557c69b67a4b
+# begin
+# 	num_bosons = 1:6
+# 	z, num_points = 2, 100
+# 	t = range(start = 0, stop = 0.15, length = num_points)
+# 	mu = range(start = 0, stop = 6, length = num_points)
+# 	U = 1
+
+	
+# 	order_param = zeros((length(num_bosons), num_points, num_points))
+	
+# 	for n in num_bosons
+# 		model = MeanField(n)
+# 		for k1 in 1:num_points, k2 in 1:num_points
+# 			order_param[n, k2, k1] = abs(get_order_parameter(model, t[k1], U, mu[k2], z))
+# 		end
+# 	end
+# end
+
+# ╔═╡ d6506517-eb11-4141-bfa5-3c413f0f4704
+# begin
+# 	ps = []
+# 	p_main = plot(framestyle = :box)
+# 	plot!(p_main, t, mu, order_param[6, :, :], st = :heatmap, colorbar = false)
+
+# 	for n in num_bosons
+# 		p = plot(t, mu, order_param[n, :, :], st = :heatmap)
+# 		plot!(t[replace([findlast(<(1e-2), order_param[n, i, :]) for i in 1:size(order_param)[2]], nothing => 1)], mu, label = "$(n)-bosons", ls = :dash, lw = 2.5, c = n, alpha = 0.8)
+# 		push!(ps, p)
+
+# 		plot!(p_main, t[replace([findlast(<(1e-2), order_param[n, i, :]) for i in 1:size(order_param)[2]], nothing => 1)], mu, label = "$(n)-bosons", ls = :dash, lw = 2.5, c = n, alpha = 0.8)
+# 	end
+
+# 	l = @layout [grid(3, 1){0.3w} b{0.4w} grid(3, 1){0.3w}]
+# 	plot(ps[1:3]..., p_main, ps[4:6]..., layout = l, size = (1600, 800))
+# end
+
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
 [deps]
@@ -173,7 +210,7 @@ Plots = "~1.33.0"
 PLUTO_MANIFEST_TOML_CONTENTS = """
 # This file is machine-generated - editing it directly is not advised
 
-julia_version = "1.8.0"
+julia_version = "1.8.1"
 manifest_format = "2.0"
 project_hash = "27b6e9f6cf55c663c5c253d0d9720fc7d8726759"
 
@@ -1203,5 +1240,7 @@ version = "1.4.1+0"
 # ╠═9acca9b2-818c-4938-9e95-e87fba3ec628
 # ╠═b2629bc0-5679-48d2-a510-d43445740e0c
 # ╠═f2f635b8-f044-4253-b34a-43434ba65870
+# ╠═ca518357-aa0d-4741-bda1-557c69b67a4b
+# ╠═d6506517-eb11-4141-bfa5-3c413f0f4704
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002
