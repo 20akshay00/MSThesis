@@ -75,12 +75,15 @@ end
 begin
 	plot()
 	for (r, L) in zip(res, Ls)
-	    plot!(Ts, getindex.(r, :M), yerror = getindex.(r, :dM), label = "L = $(L)")
+	    plot!(Ts, getindex.(r, :E), yerror = getindex.(r, :dE), label = "L = $(L)")
 	    # plot!(Ts, getindex.(r, :N) .* Ts , label = "L = $(L)")
 	end
 	
 	plot!(xlim = (0, maximum(1 ./ betas)), xlabel = "temperature T", ylabel = "Avg. energy per site")
 end
+
+# ╔═╡ 1856bf65-f8fe-4241-aa95-3ba80c5b5ad4
+bonds |> length
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
@@ -1053,5 +1056,6 @@ version = "1.4.1+0"
 # ╠═eacbfac0-f5c7-4ef9-a706-678c3a4e4f51
 # ╠═1cbd9bd1-3eba-46e1-8fde-d61c5f161a98
 # ╠═806fc534-176c-4f9d-b29e-3a60a7fb9bef
+# ╠═1856bf65-f8fe-4241-aa95-3ba80c5b5ad4
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002

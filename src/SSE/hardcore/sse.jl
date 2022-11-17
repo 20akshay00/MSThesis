@@ -215,7 +215,7 @@ end
 
 function main(Lx, Ly, beta_list=[1.], n_updates_measure=10000, n_bins=10)
     spins, op_string, bonds = init_square_lattice(Lx, Ly)
-    n_sites, n_bonds = length(spins), length(bonds)
+    n_sites, n_bonds = length(spins), first(size(bonds))
     staggered_matrix = generate_staggered_matrix(Lx, Ly)
 
     res = []
