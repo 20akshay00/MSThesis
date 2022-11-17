@@ -38,14 +38,14 @@ begin
 end
 
 # ╔═╡ 47bd514a-5a28-42cb-a0f4-acce20df9086
-begin
-	for (i, beta) in enumerate([0.1, 1.0, 64.])
-	    op_string = sse.thermalize!(spins, op_string, bonds, beta, n_updates_measure ÷ 10)
-	    ns = sse.measure!(spins, op_string, bonds, beta, n_updates_measure)
-		push!(ns_list, ns)
-		push!(bin_list, 0:length(op_string))
-	end
-end
+# begin
+# 	for (i, beta) in enumerate([0.1, 1.0, 64.])
+# 	    op_string = sse.thermalize!(spins, op_string, bonds, beta, n_updates_measure ÷ 10)
+# 	    ns = sse.measure!(spins, op_string, bonds, beta, n_updates_measure)
+# 		push!(ns_list, ns)
+# 		push!(bin_list, 0:length(op_string))
+# 	end
+# end
 
 # ╔═╡ d56d2599-af4b-4863-8b61-08f64e921e1f
 # begin
@@ -57,7 +57,7 @@ end
 begin
 	Ts = range(start = 2., stop = 0., length = 20)[1:(end - 1)]
 	betas = 1 ./ Ts
-	Ls = [8]
+	Ls = [4, 8, 16]
 	res = []
 end
 
@@ -75,7 +75,8 @@ end
 begin
 	plot()
 	for (r, L) in zip(res, Ls)
-	    plot!(Ts, getindex.(r, :Cv), yerror = getindex.(r, :dCv), label = "L = $(L)")
+	    plot!(Ts, getindex.(r, :M), yerror = getindex.(r, :dM), label = "L = $(L)")
+	    # plot!(Ts, getindex.(r, :N) .* Ts , label = "L = $(L)")
 	end
 	
 	plot!(xlim = (0, maximum(1 ./ betas)), xlabel = "temperature T", ylabel = "Avg. energy per site")

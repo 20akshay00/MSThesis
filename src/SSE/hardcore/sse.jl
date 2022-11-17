@@ -189,20 +189,35 @@ function thermalize!(spins, op_string, bonds, beta, niter)
     return op_string
 end
 
-function measure!(spins, op_string, bonds, beta, niter)
+staggered_magnetization(spins, Ms) = 0.5 * sum(spins .* Ms)
+
+function generate_staggered_matrix(Lx, Ly)
+    Ms = zeros(Int64, Lx * Ly)
+    x, y = 0:(Lx - 1), 0:(Ly - 1)
+
+    Ms[site.(x', y, Lx, Ly)] .= (-1) .^ (x' .+ y)
+    return Ms
+end
+
+function measure!(spins, op_string, bonds, beta, niter; staggered_matrix)
     ns = Vector{Int64}(undef, niter)
+    ms = Vector{Int64}(undef, niter)
+
     for i in 1:niter
-        n = diagonal_update!(spins, op_string, bonds, beta)
-        loop_update!(spins, op_string, bonds)
-        ns[i] = n      
+        ns[i] = diagonal_update!(spins, op_string, bonds, beta)
+        ms[i] = staggered_magnetization(spins, staggered_matrix)
+        
+        loop_update!(spins, op_string, bonds)     
     end
 
-    return ns
+    return ns, ms
 end
 
 function main(Lx, Ly, beta_list=[1.], n_updates_measure=10000, n_bins=10)
     spins, op_string, bonds = init_square_lattice(Lx, Ly)
     n_sites, n_bonds = length(spins), length(bonds)
+    staggered_matrix = generate_staggered_matrix(Lx, Ly)
+
     res = []
 
     for beta in beta_list
@@ -212,18 +227,22 @@ function main(Lx, Ly, beta_list=[1.], n_updates_measure=10000, n_bins=10)
         # observables
         Es = Vector{Float64}(undef, n_bins)
         Cvs = Vector{Float64}(undef, n_bins)
+        Ms = Vector{Float64}(undef, n_bins)
 
         for i in 1:n_bins
-            ns = measure!(spins, op_string, bonds, beta, n_updates_measure)
-            
+            ns, ms = measure!(spins, op_string, bonds, beta, n_updates_measure; staggered_matrix = staggered_matrix)
             n_mean = mean(ns)
-            Es[i] = (0.25 * n_bonds - n_mean/beta) / n_sites
+
+            Es[i] = (0.25 * n_bonds - (n_mean/beta)) / n_sites
             Cvs[i] = (mean(ns .^ 2) - n_mean - n_mean ^ 2) / n_sites     
+            Ms[i] = mean(abs.(ms)) / n_sites
         end 
 
         E, Eerr = mean(Es), std(Es)/sqrt(n_bins)
         Cv, Cverr = mean(Cvs), std(Cvs)/sqrt(n_bins)
-        push!(res, (E = E, dE = Eerr, Cv = Cv, dCv = Cverr))
+        M, Merr = mean(Ms), std(Ms)/sqrt(n_bins)
+
+        push!(res, (E = E, dE = Eerr, Cv = Cv, dCv = Cverr, M = M, dM = Merr))
     end
 
     return res
