@@ -31,20 +31,54 @@ sse = ingredients("./sse.jl")
 # ╔═╡ e7c22545-036e-4de9-ac60-b784179f1c13
 begin
 	Lx, Ly = 8, 8
-	n_updates_measure = 10
+	n_updates_measure = 10000
 	spins, op_string, bonds = sse.init_square_lattice(Lx, Ly)
 	ns_list = []
+	bin_list = []
 end
 
 # ╔═╡ 47bd514a-5a28-42cb-a0f4-acce20df9086
 begin
-	op = copy(op_string)
-	
-	@progress for (i, beta) in enumerate([0.1])
-	    global op = sse.thermalize!(spins, op, bonds, beta, n_updates_measure÷10)
+	for (i, beta) in enumerate([0.1, 1.0, 64.])
+	    op_string = sse.thermalize!(spins, op_string, bonds, beta, n_updates_measure ÷ 10)
 	    ns = sse.measure!(spins, op_string, bonds, beta, n_updates_measure)
 		push!(ns_list, ns)
+		push!(bin_list, 0:length(op_string))
 	end
+end
+
+# ╔═╡ d56d2599-af4b-4863-8b61-08f64e921e1f
+# begin
+# 	i = 3
+# 	plot(ns_list[i], bins = bin_list[i], st = :histogram, xticks = 0:1000:7000)
+# end
+
+# ╔═╡ eacbfac0-f5c7-4ef9-a706-678c3a4e4f51
+begin
+	Ts = range(start = 2., stop = 0., length = 20)[1:(end - 1)]
+	betas = 1 ./ Ts
+	Ls = [8]
+	res = []
+end
+
+# ╔═╡ 1cbd9bd1-3eba-46e1-8fde-d61c5f161a98
+begin	
+	for L in Ls
+	    println("=" ^ 80)
+	    println("L = ", L)
+	    E = sse.main(L, L, betas)   
+	    push!(res, E)
+	end
+end
+
+# ╔═╡ 806fc534-176c-4f9d-b29e-3a60a7fb9bef
+begin
+	plot()
+	for (r, L) in zip(res, Ls)
+	    plot!(Ts, getindex.(r, :Cv), yerror = getindex.(r, :dCv), label = "L = $(L)")
+	end
+	
+	plot!(xlim = (0, maximum(1 ./ betas)), xlabel = "temperature T", ylabel = "Avg. energy per site")
 end
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
@@ -1014,5 +1048,9 @@ version = "1.4.1+0"
 # ╠═33533a06-a7d9-4ce2-9348-d101e44c7459
 # ╠═e7c22545-036e-4de9-ac60-b784179f1c13
 # ╠═47bd514a-5a28-42cb-a0f4-acce20df9086
+# ╠═d56d2599-af4b-4863-8b61-08f64e921e1f
+# ╠═eacbfac0-f5c7-4ef9-a706-678c3a4e4f51
+# ╠═1cbd9bd1-3eba-46e1-8fde-d61c5f161a98
+# ╠═806fc534-176c-4f9d-b29e-3a60a7fb9bef
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002
