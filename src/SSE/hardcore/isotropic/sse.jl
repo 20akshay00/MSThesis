@@ -24,8 +24,7 @@ function init_square_lattice(Lx, Ly)
 end
 
 function diagonal_update!(spins, op_string, bonds, beta)
-    n_bonds = first(size(bonds))
-    M = first(size(op_string))
+    n_bonds, M = first(size(bonds)), length(op_string)
 
     # number of non-identity operators
     n = count(!=(-1), op_string)
@@ -37,7 +36,7 @@ function diagonal_update!(spins, op_string, bonds, beta)
         op = op_string[p]
         if op == -1 # if identity, propose an insertion
             b = rand(1:n_bonds) # select bond
-            if spins[bonds[b, 1]] != spins[bonds[b, 2]] # check if anti-parallel
+            if spins[bonds[b, 1]] != spins[bonds[b, 2]] # check if anti-parallel spins
                 p_insert = prob_ratio / (M - n)
                 if rand() < p_insert # metropolis sampling
                     # insert diagonal operator
@@ -69,21 +68,20 @@ function loop_update!(spins, op_string, bonds)
 end
 
 function create_linked_vertex_list(spins, op_string, bonds)
-    n_sites = first(size(spins))
-    M = first(size(op_string))
+    n_sites, M = length(spins), length(op_string)
 
     vertex_list = OffsetVector(zeros(Int64, 4 * M), 0:(4 * M - 1))
 
-    first_vertex_at_site = -1 * ones(Int64, n_sites)
-    last_vertex_at_site = -1 * ones(Int64, n_sites)
+    first_vertex_at_site = -1 * ones(Int64, n_sites) # -1 = no vertex found yet
+    last_vertex_at_site = -1 * ones(Int64, n_sites) # -1 no vertex found yet
 
     for p in eachindex(op_string)
         v0 = 4 * p # left incoming leg
         v1 = v0 + 1 # right incoming leg
         op = op_string[p]
 
-        if op == -1 # if identity
-            vertex_list[v0:(v0 + 3)] .= -2 
+        if op == -1 # identity operator
+            vertex_list[v0:(v0 + 3)] .= -2 # ignore; mark as visited
         else
             b = op ÷ 2
             s0 = bonds[b, 1]
@@ -91,16 +89,16 @@ function create_linked_vertex_list(spins, op_string, bonds)
             v2 = last_vertex_at_site[s0]
             v3 = last_vertex_at_site[s1]
             
-            if v2 == -1 # no operator encountered before
+            if v2 == -1 # no operator encountered at this site before
                 first_vertex_at_site[s0] = v0 
-            else
+            else # encountered an operator at this site before -> create link
                 vertex_list[v2] = v0
                 vertex_list[v0] = v2
             end
 
-            if v3 == -1 # no operator encountered before
+            if v3 == -1 # no operator encountered at this site before
                 first_vertex_at_site[s1] = v1 
-            else
+            else # encountered an operator at this site before -> create link
                 vertex_list[v3] = v1
                 vertex_list[v1] = v3
             end
@@ -110,10 +108,10 @@ function create_linked_vertex_list(spins, op_string, bonds)
         end
     end
 
-    # connect vertices across time boundary
+    # connect vertex legs across time boundary
     for s0 in 1:n_sites
         v0 = first_vertex_at_site[s0]
-        if v0 != -1 # there is an operator acting on the site
+        if v0 != -1 # there is an operator acting on the site -> create link
             v1 = last_vertex_at_site[s0]
             vertex_list[v1] = v0
             vertex_list[v0] = v1
@@ -124,20 +122,19 @@ function create_linked_vertex_list(spins, op_string, bonds)
 end
 
 function flip_loops!(spins, op_string, vertex_list, first_vertex_at_site)
-    n_sites = first(size(spins))
-    M = first(size(op_string))
+    n_sites, M = length(spins), length(op_string)
     
     for v0 in 0:2:(4 * M - 1)
-        if vertex_list[v0] < 0
+        if vertex_list[v0] < 0 # loop starting at this leg has already been visited
             continue
         end
 
-        v1 = v0 
+        v1 = v0 # move v1 as an open end until the entire loop has been traversed
 
         if rand() < 0.5
             while true
                 op = v1 ÷ 4
-                op_string[op] = op_string[op] ⊻ 1
+                op_string[op] = op_string[op] ⊻ 1 # flip diagonal/off diagonal 
                 vertex_list[v1] = -1
                 v2 = v1 ⊻ 1
                 v1 = vertex_list[v2]
@@ -145,8 +142,8 @@ function flip_loops!(spins, op_string, vertex_list, first_vertex_at_site)
 
                 if v1 == v0 break end
             end
-        else 
-            while true
+        else # dont flip, but mark the loop as visited
+            while true 
                 vertex_list[v1] = -2
                 v2 = v1 ⊻ 1
                 v1 = vertex_list[v2]
@@ -157,13 +154,13 @@ function flip_loops!(spins, op_string, vertex_list, first_vertex_at_site)
     end
 
     for s0 in 1:n_sites
-        if first_vertex_at_site[s0] == -1
+        if first_vertex_at_site[s0] == -1 # no operator acting on that site -> flip with p=0.5
             if rand() < 0.5
                 spins[s0] *= -1
             end
-        else
-            if vertex_list[first_vertex_at_site[s0]] == -1
-                spins[s0] *= -1
+        else # there is an operator acting on that site
+            if vertex_list[first_vertex_at_site[s0]] == -1 # did we flip the loop?
+                spins[s0] *= -1 # then we also need to flip the spin
             end
         end
     end

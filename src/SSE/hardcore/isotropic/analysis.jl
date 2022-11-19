@@ -39,9 +39,10 @@ end
 
 # ╔═╡ 47bd514a-5a28-42cb-a0f4-acce20df9086
 # begin
-# 	for (i, beta) in enumerate([0.1, 1.0, 64.])
+# 	betas = [1., 2., 4., 8., 16.]
+# 	for (i, beta) in enumerate(betas)
 # 	    op_string = sse.thermalize!(spins, op_string, bonds, beta, n_updates_measure ÷ 10)
-# 	    ns = sse.measure!(spins, op_string, bonds, beta, n_updates_measure)
+# 	    ns = sse.measure!(spins, op_string, bonds, beta, n_updates_measure; staggered_matrix = sse.generate_staggered_matrix(Lx, Ly))[1]
 # 		push!(ns_list, ns)
 # 		push!(bin_list, 0:length(op_string))
 # 	end
@@ -49,15 +50,21 @@ end
 
 # ╔═╡ d56d2599-af4b-4863-8b61-08f64e921e1f
 # begin
-# 	i = 3
-# 	plot(ns_list[i], bins = bin_list[i], st = :histogram, xticks = 0:1000:7000)
+# 	theme(:dao)
+# 	p = plot(xlabel = "Expansion order, n", ylabel = "Frequency", framestyle = :box, legend = :topright)
+# 	for (i, beta) in enumerate(betas)
+# 		plot!(ns_list[i], bins = bin_list[i], st = :stephist, normalize = true, lab = L"\beta/J = " * "$(beta)", title = "Distribution of expansion order", fillrange = zeros(bin_list[i]), alpha = 0.75)
+# 	end
+
+# 	hline!([0], c = :black, lw = 1, lab = "")
+# 	p
 # end
 
 # ╔═╡ eacbfac0-f5c7-4ef9-a706-678c3a4e4f51
 begin
 	Ts = range(start = 2., stop = 0., length = 20)[1:(end - 1)]
 	betas = 1 ./ Ts
-	Ls = [4, 8, 16]
+	Ls = [4]
 	res = []
 end
 
@@ -75,15 +82,11 @@ end
 begin
 	plot()
 	for (r, L) in zip(res, Ls)
-	    plot!(Ts, getindex.(r, :E), yerror = getindex.(r, :dE), label = "L = $(L)")
-	    # plot!(Ts, getindex.(r, :N) .* Ts , label = "L = $(L)")
+	    plot!(Ts, getindex.(r, :Cv), yerror = getindex.(r, :dCv), label = "L = $(L)")
 	end
 	
 	plot!(xlim = (0, maximum(1 ./ betas)), xlabel = "temperature T", ylabel = "Avg. energy per site")
 end
-
-# ╔═╡ 1856bf65-f8fe-4241-aa95-3ba80c5b5ad4
-bonds |> length
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
@@ -1048,7 +1051,7 @@ version = "1.4.1+0"
 
 # ╔═╡ Cell order:
 # ╠═f200d7b4-a30c-445d-aa67-57c4dacb820a
-# ╟─5c89e990-6465-11ed-1052-999c4c6ab206
+# ╠═5c89e990-6465-11ed-1052-999c4c6ab206
 # ╠═33533a06-a7d9-4ce2-9348-d101e44c7459
 # ╠═e7c22545-036e-4de9-ac60-b784179f1c13
 # ╠═47bd514a-5a28-42cb-a0f4-acce20df9086
@@ -1056,6 +1059,5 @@ version = "1.4.1+0"
 # ╠═eacbfac0-f5c7-4ef9-a706-678c3a4e4f51
 # ╠═1cbd9bd1-3eba-46e1-8fde-d61c5f161a98
 # ╠═806fc534-176c-4f9d-b29e-3a60a7fb9bef
-# ╠═1856bf65-f8fe-4241-aa95-3ba80c5b5ad4
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002
