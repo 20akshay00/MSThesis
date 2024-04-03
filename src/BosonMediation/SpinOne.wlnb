@@ -1,0 +1,93 @@
+{
+ "cells": [
+  {
+   "kind": 2,
+   "value": "R[t_, p_] := {\r\n    {Cos[t/2]^2, -1/Sqrt[2] Sin[t] Exp[-I p], Sin[t/2]^2 Exp[-2 I p]},\r\n    {1/Sqrt[2] Sin[t] Exp[I p], Cos[t], -1/Sqrt[2] Sin[t] Exp[-I p]},\r\n    {Sin[t/2]^2 Exp[2 I p], 1/Sqrt[2] Sin[t] Exp[I p], Cos[t/2]^2}\r\n    }\r\n    \r\ntMatrix = Refine[ConjugateTranspose[R[ti, pi]], Element[{ti, pi}, Reals]] . R[tj, pj];",
+   "languageId": "wolfram",
+   "outputs": [],
+   "metadata": {},
+   "executionSummary": {}
+  },
+  {
+   "kind": 2,
+   "value": "expr = Abs[tMatrix[[3, 2]]]^2 // ComplexExpand\r\nexprS = TransformedField[\"Spherical\" -> \"Cartesian\", expr, {ri, ti, pi} -> {Sxi, Syi, Szi}] // FullSimplify;\r\nexprS = TransformedField[\"Spherical\" -> \"Cartesian\", exprS, {rj, tj, pj} -> {Sxj, Syj, Szj}] // FullSimplify;\r\n\r\n{Si, Sj} = {{Sxi, Syi, Szi}, {Sxj, Syj, Szj}};\r\nexprS = Chop[exprS] // Rationalize // FullSimplify;\r\nexprS = exprS /. {Sxi^2 + Syi^2 + Szi^2 -> 1} /. {Sxj^2 + Syj^2 + Szj^2 -> 1} // FullSimplify;\r\nSolve[Eliminate[{t == exprS, X == Si . Sj, 1 == Si . Si, 1 == Sj . Sj}, {Sxi, Sxj, Syi, Syj, Szi, Szj}], t]",
+   "languageId": "wolfram",
+   "outputs": [
+    {
+     "items": [
+      {
+       "data": "<div class=\"wexpr\"><wrow><w></w><wrow><w></w><wfrac><w><w>1</w></w><w><w></w><w><w>2</w></w></w></wfrac><w></w><wsup><w></w><wrow><w></w><w>Cos</w><wrow><w></w><wb>[</wb><w>pi</w><wb>]</wb></wrow></wrow><w><w>2</w></w></wsup><w></w><wsup><w></w><wrow><w></w><w>Cos</w><wrow><w></w><wb>[</wb><w>tj</w><wb>]</wb></wrow></wrow><w><w>2</w></w></wsup><w></w><wsup><w></w><wrow><w></w><w>Sin</w><wrow><w></w><wb>[</wb><w>ti</w><wb>]</wb></wrow></wrow><w><w>2</w></w></wsup></wrow><w>+</w><wrow><w></w><wfrac><w><w>1</w></w><w><w></w><w><w>2</w></w></w></wfrac><w></w><wsup><w></w><wrow><w></w><w>Cos</w><wrow><w></w><wb>[</wb><w>tj</w><wb>]</wb></wrow></wrow><w><w>2</w></w></wsup><w></w><wsup><w></w><wrow><w></w><w>Sin</w><wrow><w></w><wb>[</wb><w>pi</w><wb>]</wb></wrow></wrow><w><w>2</w></w></wsup><w></w><wsup><w></w><wrow><w></w><w>Sin</w><wrow><w></w><wb>[</wb><w>ti</w><wb>]</wb></wrow></wrow><w><w>2</w></w></wsup></wrow><w>-</w><wrow><w></w><wrow><w></w><w>Cos</w><wrow><w></w><wb>[</wb><w>pi</w><wb>]</wb></wrow></wrow><w></w><wrow><w></w><w>Cos</w><wrow><w></w><wb>[</wb><w>pj</w><wb>]</wb></wrow></wrow><w></w><wsup><w></w><wrow><w></w><w>Cos</w><wrow><w></w><wb>[</wb><wfrac><w><w>ti</w></w><w><w></w><w><w>2</w></w></w></wfrac><wb>]</wb></wrow></wrow><w><w>2</w></w></wsup><w></w><wrow><w></w><w>Cos</w><wrow><w></w><wb>[</wb><w>tj</w><wb>]</wb></wrow></wrow><w></w><wrow><w></w><w>Sin</w><wrow><w></w><wb>[</wb><w>ti</w><wb>]</wb></wrow></wrow><w></w><wrow><w></w><w>Sin</w><wrow><w></w><wb>[</wb><w>tj</w><wb>]</wb></wrow></wrow></wrow><w>-</w><wrow><w></w><wsup><w></w><wrow><w></w><w>Cos</w><wrow><w></w><wb>[</wb><wfrac><w><w>ti</w></w><w><w></w><w><w>2</w></w></w></wfrac><wb>]</wb></wrow></wrow><w><w>2</w></w></wsup><w></w><wrow><w></w><w>Cos</w><wrow><w></w><wb>[</wb><w>tj</w><wb>]</wb></wrow></wrow><w></w><wrow><w></w><w>Sin</w><wrow><w></w><wb>[</wb><w>pi</w><wb>]</wb></wrow></wrow><w></w><wrow><w></w><w>Sin</w><wrow><w></w><wb>[</wb><w>pj</w><wb>]</wb></wrow></wrow><w></w><wrow><w></w><w>Sin</w><wrow><w></w><wb>[</wb><w>ti</w><wb>]</wb></wrow></wrow><w></w><wrow><w></w><w>Sin</w><wrow><w></w><wb>[</wb><w>tj</w><wb>]</wb></wrow></wrow></wrow><w>+</w><wrow><w></w><wrow><w></w><w>Cos</w><wrow><w></w><wb>[</wb><w>pi</w><wb>]</wb></wrow></wrow><w></w><wrow><w></w><w>Cos</w><wrow><w></w><wb>[</wb><wrow><w></w><wrow><w></w><w>2</w><w></w><w>pi</w></wrow><w>-</w><w>pj</w></wrow><wb>]</wb></wrow></wrow><w></w><wrow><w></w><w>Cos</w><wrow><w></w><wb>[</wb><w>tj</w><wb>]</wb></wrow></wrow><w></w><wsup><w></w><wrow><w></w><w>Sin</w><wrow><w></w><wb>[</wb><wfrac><w><w>ti</w></w><w><w></w><w><w>2</w></w></w></wfrac><wb>]</wb></wrow></wrow><w><w>2</w></w></wsup><w></w><wrow><w></w><w>Sin</w><wrow><w></w><wb>[</wb><w>ti</w><wb>]</wb></wrow></wrow><w></w><wrow><w></w><w>Sin</w><wrow><w></w><wb>[</wb><w>tj</w><wb>]</wb></wrow></wrow></wrow><w>+</w><wrow><w></w><wrow><w></w><w>Cos</w><wrow><w></w><wb>[</wb><w>tj</w><wb>]</wb></wrow></wrow><w></w><wrow><w></w><w>Sin</w><wrow><w></w><wb>[</wb><w>pi</w><wb>]</wb></wrow></wrow><w></w><wrow><w></w><w>Sin</w><wrow><w></w><wb>[</wb><wrow><w></w><wrow><w></w><w>2</w><w></w><w>pi</w></wrow><w>-</w><w>pj</w></wrow><wb>]</wb></wrow></wrow><w></w><wsup><w></w><wrow><w></w><w>Sin</w><wrow><w></w><wb>[</wb><wfrac><w><w>ti</w></w><w><w></w><w><w>2</w></w></w></wfrac><wb>]</wb></wrow></wrow><w><w>2</w></w></wsup><w></w><wrow><w></w><w>Sin</w><wrow><w></w><wb>[</wb><w>ti</w><wb>]</wb></wrow></wrow><w></w><wrow><w></w><w>Sin</w><wrow><w></w><wb>[</wb><w>tj</w><wb>]</wb></wrow></wrow></wrow><w>+</w><wrow><w></w><wfrac><w><w>1</w></w><w><w></w><w><w>2</w></w></w></wfrac><w></w><wsup><w></w><wrow><w></w><w>Cos</w><wrow><w></w><wb>[</wb><w>pj</w><wb>]</wb></wrow></wrow><w><w>2</w></w></wsup><w></w><wsup><w></w><wrow><w></w><w>Cos</w><wrow><w></w><wb>[</wb><wfrac><w><w>ti</w></w><w><w></w><w><w>2</w></w></w></wfrac><wb>]</wb></wrow></wrow><w><w>4</w></w></wsup><w></w><wsup><w></w><wrow><w></w><w>Sin</w><wrow><w></w><wb>[</wb><w>tj</w><wb>]</wb></wrow></wrow><w><w>2</w></w></wsup></wrow><w>+</w><wrow><w></w><wfrac><w><w>1</w></w><w><w></w><w><w>2</w></w></w></wfrac><w></w><wsup><w></w><wrow><w></w><w>Cos</w><wrow><w></w><wb>[</wb><wfrac><w><w>ti</w></w><w><w></w><w><w>2</w></w></w></wfrac><wb>]</wb></wrow></wrow><w><w>4</w></w></wsup><w></w><wsup><w></w><wrow><w></w><w>Sin</w><wrow><w></w><wb>[</wb><w>pj</w><wb>]</wb></wrow></wrow><w><w>2</w></w></wsup><w></w><wsup><w></w><wrow><w></w><w>Sin</w><wrow><w></w><wb>[</wb><w>tj</w><wb>]</wb></wrow></wrow><w><w>2</w></w></wsup></wrow><w>-</w><wrow><w></w><wrow><w></w><w>Cos</w><wrow><w></w><wb>[</wb><wrow><w></w><wrow><w></w><w>2</w><w></w><w>pi</w></wrow><w>-</w><w>pj</w></wrow><wb>]</wb></wrow></wrow><w></w><wrow><w></w><w>Cos</w><wrow><w></w><wb>[</wb><w>pj</w><wb>]</wb></wrow></wrow><w></w><wsup><w></w><wrow><w></w><w>Cos</w><wrow><w></w><wb>[</wb><wfrac><w><w>ti</w></w><w><w></w><w><w>2</w></w></w></wfrac><wb>]</wb></wrow></wrow><w><w>2</w></w></wsup><w></w><wsup><w></w><wrow><w></w><w>Sin</w><wrow><w></w><wb>[</wb><wfrac><w><w>ti</w></w><w><w></w><w><w>2</w></w></w></wfrac><wb>]</wb></wrow></wrow><w><w>2</w></w></wsup><w></w><wsup><w></w><wrow><w></w><w>Sin</w><wrow><w></w><wb>[</wb><w>tj</w><wb>]</wb></wrow></wrow><w><w>2</w></w></wsup></wrow><w>-</w><wrow><w></w><wsup><w></w><wrow><w></w><w>Cos</w><wrow><w></w><wb>[</wb><wfrac><w><w>ti</w></w><w><w></w><w><w>2</w></w></w></wfrac><wb>]</wb></wrow></wrow><w><w>2</w></w></wsup><w></w><wrow><w></w><w>Sin</w><wrow><w></w><wb>[</wb><wrow><w></w><wrow><w></w><w>2</w><w></w><w>pi</w></wrow><w>-</w><w>pj</w></wrow><wb>]</wb></wrow></wrow><w></w><wrow><w></w><w>Sin</w><wrow><w></w><wb>[</wb><w>pj</w><wb>]</wb></wrow></wrow><w></w><wsup><w></w><wrow><w></w><w>Sin</w><wrow><w></w><wb>[</wb><wfrac><w><w>ti</w></w><w><w></w><w><w>2</w></w></w></wfrac><wb>]</wb></wrow></wrow><w><w>2</w></w></wsup><w></w><wsup><w></w><wrow><w></w><w>Sin</w><wrow><w></w><wb>[</wb><w>tj</w><wb>]</wb></wrow></wrow><w><w>2</w></w></wsup></wrow><w>+</w><wrow><w></w><wfrac><w><w>1</w></w><w><w></w><w><w>2</w></w></w></wfrac><w></w><wsup><w></w><wrow><w></w><w>Cos</w><wrow><w></w><wb>[</wb><wrow><w></w><wrow><w></w><w>2</w><w></w><w>pi</w></wrow><w>-</w><w>pj</w></wrow><wb>]</wb></wrow></wrow><w><w>2</w></w></wsup><w></w><wsup><w></w><wrow><w></w><w>Sin</w><wrow><w></w><wb>[</wb><wfrac><w><w>ti</w></w><w><w></w><w><w>2</w></w></w></wfrac><wb>]</wb></wrow></wrow><w><w>4</w></w></wsup><w></w><wsup><w></w><wrow><w></w><w>Sin</w><wrow><w></w><wb>[</wb><w>tj</w><wb>]</wb></wrow></wrow><w><w>2</w></w></wsup></wrow><w>+</w><wrow><w></w><wfrac><w><w>1</w></w><w><w></w><w><w>2</w></w></w></wfrac><w></w><wsup><w></w><wrow><w></w><w>Sin</w><wrow><w></w><wb>[</wb><wrow><w></w><wrow><w></w><w>2</w><w></w><w>pi</w></wrow><w>-</w><w>pj</w></wrow><wb>]</wb></wrow></wrow><w><w>2</w></w></wsup><w></w><wsup><w></w><wrow><w></w><w>Sin</w><wrow><w></w><wb>[</wb><wfrac><w><w>ti</w></w><w><w></w><w><w>2</w></w></w></wfrac><wb>]</wb></wrow></wrow><w><w>4</w></w></wsup><w></w><wsup><w></w><wrow><w></w><w>Sin</w><wrow><w></w><wb>[</wb><w>tj</w><wb>]</wb></wrow></wrow><w><w>2</w></w></wsup></wrow></wrow></div>",
+       "mime": "x-application/wolfram-language-html"
+      },
+      {
+       "data": "(Cos[pi]^2*Cos[tj]^2*Sin[ti]^2)/2 + (Cos[tj]^2*Sin[pi]^2*Sin[ti]^2)/2 - Cos[pi]*Cos[pj]*Cos[ti/2]^2*Cos[tj]*Sin[ti]*Sin[tj] - Cos[ti/2]^2*Cos[tj]*Sin[pi]*Sin[pj]*Sin[ti]*Sin[tj] + Cos[pi]*Cos[2*pi - pj]*Cos[tj]*Sin[ti/2]^2*Sin[ti]*Sin[tj] + Cos[tj]*Sin[pi]*Sin[2*pi - pj]*Sin[ti/2]^2*Sin[ti]*Sin[tj] + (Cos[pj]^2*Cos[ti/2]^4*Sin[tj]^2)/2 + (Cos[ti/2]^4*Sin[pj]^2*Sin[tj]^2)/2 - Cos[2*pi - pj]*Cos[pj]*Cos[ti/2]^2*Sin[ti/2]^2*Sin[tj]^2 - Cos[ti/2]^2*Sin[2*pi - pj]*Sin[pj]*Sin[ti/2]^2*Sin[tj]^2 + (Cos[2*pi - pj]^2*Sin[ti/2]^4*Sin[tj]^2)/2 + (Sin[2*pi - pj]^2*Sin[ti/2]^4*Sin[tj]^2)/2",
+       "mime": "text/plain"
+      }
+     ],
+     "id": "dc8ef446-999c-4589-9c0e-fc0d225f8e68",
+     "metadata": {
+      "cellLabel": "Out[82]= ",
+      "isBoxData": false
+     }
+    },
+    {
+     "items": [
+      {
+       "data": "<div class=\"wexpr\"><wrow><w></w><wb>{</wb><wrow><w></w><wb>{</wb><wrow><w></w><w>t</w><w class=\"symbol\"></w><wrow><w></w><wfrac><w><w>1</w></w><w><w></w><w><w>2</w></w></w></wfrac><w></w><wrow><w></w><wb>(</wb><wrow><w></w><w>1</w><w>-</w><wsup><w></w><w>X</w><w><w>2</w></w></wsup></wrow><wb>)</wb></wrow></wrow></wrow><wb>}</wb></wrow><wb>}</wb></wrow></div>",
+       "mime": "x-application/wolfram-language-html"
+      },
+      {
+       "data": "{{t -> (1 - X^2)/2}}",
+       "mime": "text/plain"
+      }
+     ],
+     "id": "77fc3291-6d64-47bb-8bf4-a70cc6ee12a0",
+     "metadata": {
+      "cellLabel": "Out[88]= ",
+      "isBoxData": false
+     }
+    }
+   ],
+   "metadata": {},
+   "executionSummary": {
+    "timing": {
+     "startTime": 1679416773333,
+     "endTime": 1679416773334
+    },
+    "success": false
+   }
+  },
+  {
+   "kind": 1,
+   "value": "### Old version",
+   "languageId": "markdown",
+   "outputs": [],
+   "metadata": {},
+   "executionSummary": {}
+  },
+  {
+   "kind": 2,
+   "value": "(* R[t_, p_] := {\r\n    {Cos[t/2]^2, -1/Sqrt[2] Sin[t] Exp[-I p], Sin[t/2]^2 Exp[-2 I p]},\r\n    {1/Sqrt[2] Sin[t] Exp[I p], Cos[t], -1/Sqrt[2] Sin[t] Exp[-I p]},\r\n    {Sin[t/2]^2 Exp[2 I p], 1/Sqrt[2] Sin[t] Exp[I p], Cos[t/2]^2}\r\n    }\r\n    \r\ntMatrix = Transpose[{il, im, in}] . Refine[ConjugateTranspose[R[ti, pi]], Element[{ti, pi}, Reals]] . R[tj, pj] . {jl, jm, jn}; *)",
+   "languageId": "wolfram",
+   "outputs": [],
+   "metadata": {},
+   "executionSummary": {}
+  },
+  {
+   "kind": 2,
+   "value": "(* expr = Abs[Coefficient[tMatrix, in jl]]^2 // ComplexExpand\r\nexprS = TransformedField[\"Spherical\" -> \"Cartesian\", expr, {ri, ti, pi} -> {Sxi, Syi, Szi}] // FullSimplify;\r\nexprS = TransformedField[\"Spherical\" -> \"Cartesian\", exprS, {rj, tj, pj} -> {Sxj, Syj, Szj}] // FullSimplify;\r\n\r\n{Si, Sj} = {{Sxi, Syi, Szi}, {Sxj, Syj, Szj}};\r\nexprS = Chop[exprS] // Rationalize // FullSimplify;\r\nexprS = exprS /. {Sxi^2 + Syi^2 + Szi^2 -> 1} /. {Sxj^2 + Syj^2 + Szj^2 -> 1} // FullSimplify;\r\nSolve[Eliminate[{t == exprS, X == Si . Sj, 1 == Si . Si, 1 == Sj . Sj}, {Sxi, Sxj, Syi, Syj, Szi, Szj}], t] *)",
+   "languageId": "wolfram",
+   "outputs": [],
+   "metadata": {},
+   "executionSummary": {}
+  },
+  {
+   "kind": 2,
+   "value": "",
+   "languageId": "wolfram",
+   "outputs": [],
+   "metadata": {},
+   "executionSummary": {}
+  }
+ ]
+}

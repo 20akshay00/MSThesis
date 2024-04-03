@@ -1,0 +1,219 @@
+{
+ "cells": [
+  {
+   "kind": 2,
+   "value": "Jx = 1/Sqrt[2] {{0, 1, 0}, {1, 0, 1}, {0, 1, 0}};\r\nJy = I/Sqrt[2] {{0, -1, 0}, {1, 0, -1}, {0, 1, 0}};\r\nJz = {{1, 0, 0}, {0, 0, 0}, {0, 0, -1}};",
+   "languageId": "wolfram",
+   "outputs": [],
+   "metadata": {},
+   "executionSummary": {}
+  },
+  {
+   "kind": 2,
+   "value": "S = {Sx, Sy, Sz};",
+   "languageId": "wolfram",
+   "outputs": [],
+   "metadata": {},
+   "executionSummary": {}
+  },
+  {
+   "kind": 2,
+   "value": "S . {Jx, Jy, Jz} // MatrixForm",
+   "languageId": "wolfram",
+   "outputs": [
+    {
+     "items": [
+      {
+       "data": "<div class=\"wexpr\"><wrow><w></w><wb>(</wb><w>⁠</w><wgrid style=\"grid-template-columns:repeat(3,max-content);\"><w><w>Sz</w></w><w><wrow><w></w><wfrac><w><w>Sx</w></w><w><w></w><w><wsqrt><w><w>\\</w></w><w></w><w><w>2</w></w></wsqrt></w></w></wfrac><w>-</w><wfrac><w><wrow><w></w><w>𝕚</w><w></w><w>Sy</w></wrow></w><w><w></w><w><wsqrt><w><w>\\</w></w><w></w><w><w>2</w></w></wsqrt></w></w></wfrac></wrow></w><w><w>0</w></w><w><wrow><w></w><wfrac><w><w>Sx</w></w><w><w></w><w><wsqrt><w><w>\\</w></w><w></w><w><w>2</w></w></wsqrt></w></w></wfrac><w>+</w><wfrac><w><wrow><w></w><w>𝕚</w><w></w><w>Sy</w></wrow></w><w><w></w><w><wsqrt><w><w>\\</w></w><w></w><w><w>2</w></w></wsqrt></w></w></wfrac></wrow></w><w><w>0</w></w><w><wrow><w></w><wfrac><w><w>Sx</w></w><w><w></w><w><wsqrt><w><w>\\</w></w><w></w><w><w>2</w></w></wsqrt></w></w></wfrac><w>-</w><wfrac><w><wrow><w></w><w>𝕚</w><w></w><w>Sy</w></wrow></w><w><w></w><w><wsqrt><w><w>\\</w></w><w></w><w><w>2</w></w></wsqrt></w></w></wfrac></wrow></w><w><w>0</w></w><w><wrow><w></w><wfrac><w><w>Sx</w></w><w><w></w><w><wsqrt><w><w>\\</w></w><w></w><w><w>2</w></w></wsqrt></w></w></wfrac><w>+</w><wfrac><w><wrow><w></w><w>𝕚</w><w></w><w>Sy</w></wrow></w><w><w></w><w><wsqrt><w><w>\\</w></w><w></w><w><w>2</w></w></wsqrt></w></w></wfrac></wrow></w><w><wrow><w></w><w>-</w><w>Sz</w></wrow></w></wgrid><w>⁠</w><wb>)</wb></wrow></div>",
+       "mime": "x-application/wolfram-language-html"
+      },
+      {
+       "data": "MatrixForm[{{Sz, Sx/Sqrt[2] - (I*Sy)/Sqrt[2], 0}, {Sx/Sqrt[2] + (I*Sy)/Sqrt[2], 0, Sx/Sqrt[2] - (I*Sy)/Sqrt[2]}, {0, Sx/Sqrt[2] + (I*Sy)/Sqrt[2], -Sz}}]",
+       "mime": "text/plain"
+      }
+     ],
+     "id": "af21e27d-a7c1-45dd-902e-e37d26728584",
+     "metadata": {
+      "cellLabel": "Out[38]//MatrixForm= ",
+      "isBoxData": false
+     }
+    }
+   ],
+   "metadata": {},
+   "executionSummary": {}
+  },
+  {
+   "kind": 2,
+   "value": "Sx[S_] = Table[(1/2) * Sqrt[S (S + 1) - m n] * (KroneckerDelta[m, n + 1] + KroneckerDelta[m + 1, n]), {m, -S, S}, {n, -S, S}];\r\nSy[S_] = Table[(I/2) * Sqrt[S (S + 1) - m n] * (KroneckerDelta[m, n + 1] - KroneckerDelta[m + 1, n]), {m, -S, S}, {n, -S, S}];\r\nSz[S_] = Table[m * KroneckerDelta[m, n], {m, -S, S}, {n, -S, S}];",
+   "languageId": "wolfram",
+   "outputs": [
+    {
+     "items": [
+      {
+       "data": "<pre><span class=\"wl-message\">Table::iterb</span>: Iterator {m, -S, S} does not have appropriate bounds.</pre>",
+       "mime": "x-application/wolfram-language-html"
+      },
+      {
+       "data": "Table::iterb: Iterator {m, -S, S} does not have appropriate bounds.",
+       "mime": "text/plain"
+      }
+     ],
+     "id": "00bf2d4f-85f3-4d01-adf5-2e3b97666701",
+     "metadata": {
+      "cellLabel": "",
+      "isBoxData": false
+     }
+    },
+    {
+     "items": [
+      {
+       "data": "<pre><span class=\"wl-message\">Table::iterb</span>: Iterator {m, -S, S} does not have appropriate bounds.</pre>",
+       "mime": "x-application/wolfram-language-html"
+      },
+      {
+       "data": "Table::iterb: Iterator {m, -S, S} does not have appropriate bounds.",
+       "mime": "text/plain"
+      }
+     ],
+     "id": "de9bdc0a-aae2-432f-ba98-b1b7245ba25a",
+     "metadata": {
+      "cellLabel": "",
+      "isBoxData": false
+     }
+    },
+    {
+     "items": [
+      {
+       "data": "<pre><span class=\"wl-message\">Table::iterb</span>: Iterator {m, -S, S} does not have appropriate bounds.</pre>",
+       "mime": "x-application/wolfram-language-html"
+      },
+      {
+       "data": "Table::iterb: Iterator {m, -S, S} does not have appropriate bounds.",
+       "mime": "text/plain"
+      }
+     ],
+     "id": "4c12e5e5-cd63-4e64-be46-86b50c8f3bd0",
+     "metadata": {
+      "cellLabel": "",
+      "isBoxData": false
+     }
+    }
+   ],
+   "metadata": {},
+   "executionSummary": {}
+  },
+  {
+   "kind": 2,
+   "value": "s = 1/2; (* spin *)\r\nn = {Cos[p] Sin[t], Sin[p] Sin[t], Cos[t]}; (* classical spin axis *)\r\n\r\n(* construct spin matrix along classical axis, and simplify to complex exponentials *)\r\nM = n . {Sx[s], Sy[s], Sz[s]} /. {x_[y_] /; \r\n    And[MemberQ[{Sin, Cos, Tan, Csc, Sec, Cot}, x], \r\n        Length[Position[y, p]] > 0]\r\n    :> TrigToExp[x[y]]} // Simplify;\r\n \r\n(* Find eigenvector matrix and sort in order of eigenvalues *)\r\nU = Eigenvectors[M][[Ordering[Eigenvalues[M], All, GreaterEqual]]] // Transpose // TrigFactor;\r\n(* Construct unitary rotation matrix (orthonormal eigvecs) *)\r\nU = FullSimplify[Refine[U . Inverse[Sqrt[Simplify[ConjugateTranspose[U].U]]], Element[{t, p}, Reals]], {t > 0, t < Pi}];\r\n\r\nU // MatrixForm\r\n",
+   "languageId": "wolfram",
+   "outputs": [
+    {
+     "items": [
+      {
+       "data": "<div class=\"wexpr\"><wrow><w></w><wb>(</wb><w>⁠</w><wgrid style=\"grid-template-columns:repeat(2,max-content);\"><w><wrow><w></w><wsup><w></w><w>𝕖</w><w><wrow><w></w><wrow><w></w><w>-</w><w>𝕚</w></wrow><w></w><w>p</w></wrow></w></wsup><w></w><wrow><w></w><w>Sin</w><wrow><w></w><wb>[</wb><wfrac><w><w>t</w></w><w><w></w><w><w>2</w></w></w></wfrac><wb>]</wb></wrow></wrow></wrow></w><w><wrow><w></w><wrow><w></w><w>-</w><wsup><w></w><w>𝕖</w><w><wrow><w></w><wrow><w></w><w>-</w><w>𝕚</w></wrow><w></w><w>p</w></wrow></w></wsup></wrow><w></w><wrow><w></w><w>Cos</w><wrow><w></w><wb>[</wb><wfrac><w><w>t</w></w><w><w></w><w><w>2</w></w></w></wfrac><wb>]</wb></wrow></wrow></wrow></w><w><wrow><w></w><w>Cos</w><wrow><w></w><wb>[</wb><wfrac><w><w>t</w></w><w><w></w><w><w>2</w></w></w></wfrac><wb>]</wb></wrow></wrow></w><w><wrow><w></w><w>Sin</w><wrow><w></w><wb>[</wb><wfrac><w><w>t</w></w><w><w></w><w><w>2</w></w></w></wfrac><wb>]</wb></wrow></wrow></w></wgrid><w>⁠</w><wb>)</wb></wrow></div>",
+       "mime": "x-application/wolfram-language-html"
+      },
+      {
+       "data": "MatrixForm[{{Sin[t/2]/E^(I*p), -(Cos[t/2]/E^(I*p))}, {Cos[t/2], Sin[t/2]}}]",
+       "mime": "text/plain"
+      }
+     ],
+     "id": "a499a241-ebb9-43c0-836f-b4962f3247fb",
+     "metadata": {
+      "cellLabel": "Out[44]//MatrixForm= ",
+      "isBoxData": false
+     }
+    }
+   ],
+   "metadata": {},
+   "executionSummary": {}
+  },
+  {
+   "kind": 2,
+   "value": "tMatrix = Refine[ConjugateTranspose[U /. {t -> ti, p -> pi}], Element[{ti, pi}, Reals]] . U /. {t -> tj, p -> pj};",
+   "languageId": "wolfram",
+   "outputs": [],
+   "metadata": {},
+   "executionSummary": {}
+  },
+  {
+   "kind": 2,
+   "value": "expr = Abs[tMatrix[[2, 2]]]^2 // ComplexExpand // TrigReduce\r\nexprS = TransformedField[\"Spherical\" -> \"Cartesian\", expr, {ri, ti, pi} -> {Sxi, Syi, Szi}] // FullSimplify;\r\nexprS = TransformedField[\"Spherical\" -> \"Cartesian\", exprS, {rj, tj, pj} -> {Sxj, Syj, Szj}] // FullSimplify;\r\n\r\n{Si, Sj} = {{Sxi, Syi, Szi}, {Sxj, Syj, Szj}};\r\nexprS = Chop[exprS] // Rationalize // FullSimplify;\r\nexprS = exprS /. {Sxi^2 + Syi^2 + Szi^2 -> 1} /. {Sxj^2 + Syj^2 + Szj^2 -> 1} // FullSimplify;\r\nSolve[Eliminate[{t == exprS, X == Si . Sj, 1 == Si . Si, 1 == Sj . Sj}, {Sxi, Sxj, Syi, Syj, Szi, Szj}], t]",
+   "languageId": "wolfram",
+   "outputs": [
+    {
+     "items": [
+      {
+       "data": "<div class=\"wexpr\"><wrow><w></w><wfrac><w><w>1</w></w><w><w></w><w><w>8</w></w></w></wfrac><w></w><wrow><w></w><wb>(</wb><wrow><w></w><w>4</w><w>-</w><wrow><w></w><w>Cos</w><wrow><w></w><wb>[</wb><wrow><w></w><w>pi</w><w>-</w><w>pj</w><w>-</w><w>ti</w><w>-</w><w>tj</w></wrow><wb>]</wb></wrow></wrow><w>+</w><wrow><w></w><w>2</w><w></w><wrow><w></w><w>Cos</w><wrow><w></w><wb>[</wb><wrow><w></w><w>ti</w><w>-</w><w>tj</w></wrow><wb>]</wb></wrow></wrow></wrow><w>+</w><wrow><w></w><w>Cos</w><wrow><w></w><wb>[</wb><wrow><w></w><w>pi</w><w>-</w><w>pj</w><w>+</w><w>ti</w><w>-</w><w>tj</w></wrow><wb>]</wb></wrow></wrow><w>+</w><wrow><w></w><w>Cos</w><wrow><w></w><wb>[</wb><wrow><w></w><w>pi</w><w>-</w><w>pj</w><w>-</w><w>ti</w><w>+</w><w>tj</w></wrow><wb>]</wb></wrow></wrow><w>+</w><wrow><w></w><w>2</w><w></w><wrow><w></w><w>Cos</w><wrow><w></w><wb>[</wb><wrow><w></w><w>ti</w><w>+</w><w>tj</w></wrow><wb>]</wb></wrow></wrow></wrow><w>-</w><wrow><w></w><w>Cos</w><wrow><w></w><wb>[</wb><wrow><w></w><w>pi</w><w>-</w><w>pj</w><w>+</w><w>ti</w><w>+</w><w>tj</w></wrow><wb>]</wb></wrow></wrow></wrow><wb>)</wb></wrow></wrow></div>",
+       "mime": "x-application/wolfram-language-html"
+      },
+      {
+       "data": "(4 - Cos[pi - pj - ti - tj] + 2*Cos[ti - tj] + Cos[pi - pj + ti - tj] + Cos[pi - pj - ti + tj] + 2*Cos[ti + tj] - Cos[pi - pj + ti + tj])/8",
+       "mime": "text/plain"
+      }
+     ],
+     "id": "a2b7595f-435b-466d-a67b-965f4aa225a3",
+     "metadata": {
+      "cellLabel": "Out[67]= ",
+      "isBoxData": false
+     }
+    },
+    {
+     "items": [
+      {
+       "data": "<div class=\"wexpr\"><wrow><w></w><wb>{</wb><wrow><w></w><wb>{</wb><wrow><w></w><w>t</w><w class=\"symbol\"></w><wfrac><w><wrow><w></w><w>1</w><w>+</w><w>X</w></wrow></w><w><w></w><w><w>2</w></w></w></wfrac></wrow><wb>}</wb></wrow><wb>}</wb></wrow></div>",
+       "mime": "x-application/wolfram-language-html"
+      },
+      {
+       "data": "{{t -> (1 + X)/2}}",
+       "mime": "text/plain"
+      }
+     ],
+     "id": "ff1147f9-ac6e-46b3-9d5e-be8315377f13",
+     "metadata": {
+      "cellLabel": "Out[73]= ",
+      "isBoxData": false
+     }
+    }
+   ],
+   "metadata": {},
+   "executionSummary": {}
+  },
+  {
+   "kind": 2,
+   "value": "R[t_, p_] := {\r\n    {Cos[t/2]^2, -1/Sqrt[2] Sin[t] Exp[-I p], Sin[t/2]^2 Exp[-2 I p]},\r\n    {1/Sqrt[2] Sin[t] Exp[I p], Cos[t], -1/Sqrt[2] Sin[t] Exp[-I p]},\r\n    {Sin[t/2]^2 Exp[2 I p], 1/Sqrt[2] Sin[t] Exp[I p], Cos[t/2]^2}\r\n    }\r\n    \r\ntMatrix = Refine[ConjugateTranspose[R[ti, pi]], Element[{ti, pi}, Reals]] . R[tj, pj];",
+   "languageId": "wolfram",
+   "outputs": [],
+   "metadata": {},
+   "executionSummary": {
+    "timing": {
+     "startTime": 1680078923269,
+     "endTime": 1680078923270
+    },
+    "success": false
+   }
+  },
+  {
+   "kind": 2,
+   "value": "1",
+   "languageId": "wolfram",
+   "outputs": [],
+   "metadata": {},
+   "executionSummary": {
+    "timing": {
+     "startTime": 1680078964183,
+     "endTime": 1680078964184
+    },
+    "success": false
+   }
+  },
+  {
+   "kind": 2,
+   "value": "",
+   "languageId": "wolfram",
+   "outputs": [],
+   "metadata": {},
+   "executionSummary": {}
+  }
+ ]
+}

@@ -9,6 +9,7 @@ This repository hosts the various scripts written as part of my Master's thesis 
 - `Solving_eBHM` contains the mean-field scripts used to study the extended Bose-Hubbard model in Chapter 4.
 - `SpinBosons` contains the mean-field scripts used to study the spin-1 Bose-Hubbard model in Chapter 5.
 - `PhaseBoundary` contains the code utilizing a bisection algorithm to compute phase boundaries for all the above mentioned chapters.
+- `BosonMediation` contains Wolfram Language notebooks used to derive analytic expressions for the perturbative treatment performed in Chapter 6. Running these requires the VSCode extension, [WolframLanguageForJupyter](https://github.com/WolframResearch/WolframLanguageForJupyter).
 - `SSE` contains a broken attempt at implementing the Stochastic Series Expansion as described in Chapter 7.
 - [`BoseHubbardMachineLearning`](https://github.com/20akshay00/BoseHubbardMachineLearning) contains the neural network approach to solve the Bose-Hubbard model as described in Chapter 7.
 
