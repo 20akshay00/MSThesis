@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.19.14
+# v0.19.13
 
 using Markdown
 using InteractiveUtils
@@ -23,7 +23,7 @@ begin
 	    H = -mu * model.n + 0.5 * U * model.n * (model.n - I) - t * z * psi * (model.a + model.a') + t * z * psi^2 * I
 	    return H 
 	end
-	
+		
 	function get_order_parameter(model, t, U, mu, z)
 	    E_gs(psi) = eigvals(get_hamiltonian(model, t, U, mu, z, psi[1]))[1]
 	    return Optim.minimizer(optimize(E_gs, zeros(1)))[1]
@@ -39,23 +39,23 @@ begin
 end
 
 # ╔═╡ 29836763-e203-4338-9744-dadf4d0a5483
-# begin
-# 	model = MeanField(10)
+begin
+	model = MeanField(10)
 	
-# 	z, num_points = 2, 100
-# 	t = range(start = 0, stop = 0.15, length = num_points)
-# 	mu = range(start = 0, stop = 3, length = num_points)
-# 	U = 1
+	z, num_points = 2, 100
+	t = range(start = 0, stop = 0.15, length = num_points)
+	mu = range(start = 0, stop = 3, length = num_points)
+	U = 1
+
+	order_param = zeros((num_points, num_points))
+	num_particles = zeros((num_points, num_points))
 	
-# 	order_param = zeros((num_points, num_points))
-# 	num_particles = zeros((num_points, num_points))
+	for k1 in 1:num_points, k2 in 1:num_points
+	    order_param[k2, k1] = abs(get_order_parameter(model, t[k1], U, mu[k2], z))
+	    num_particles[k2, k1] = abs(get_num_particles(model, t[k1], U, mu[k2], z))
+	end
 	
-# 	for k1 in 1:num_points, k2 in 1:num_points
-# 	    order_param[k2, k1] = abs(get_order_parameter(model, t[k1], U, mu[k2], z))
-# 	    num_particles[k2, k1] = abs(get_num_particles(model, t[k1], U, mu[k2], z))
-# 	end
-	
-# end
+end
 
 # ╔═╡ c1d74af5-d79b-4d2a-a154-45dbe2806c5b
 # begin
@@ -110,50 +110,50 @@ p1
 p2
 
 # ╔═╡ f2f635b8-f044-4253-b34a-43434ba65870
-# begin
-# 	theme(:dao)
-# 	gr(dpi = 1000)
-# 	p3 = heatmap(t, mu, order_param)
-# 	plot!(
-# 	    ylabel = "μ/U (chemical potential)",
-# 	    xlabel = "t/U (hopping parameter)",
-# 	    framestyle = :box, 
-# 	    title = "\n1D MFT Phase diagram",  
-# 	    colorbar_title = "\nOrder Parameter",
-# 		right_margin = 5Plots.mm,
-# 		left_margin = 2Plots.mm,
-# 		bottom_margin = 2Plots.mm,
-# 		top_margin = 3Plots.mm,
-# 		xlims = [minimum(t), maximum(t)],
-# 		ylims = [minimum(mu), maximum(mu)])
+begin
+	theme(:dao)
+	gr(dpi = 300)
+	p3 = heatmap(t, mu, order_param)
+	plot!(
+	    ylabel = "μ/U (chemical potential)",
+	    xlabel = "t/U (hopping parameter)",
+	    framestyle = :box, 
+	    title = "\n1D MFT Phase diagram",  
+	    colorbar_title = "\nOrder Parameter",
+		right_margin = 5Plots.mm,
+		left_margin = 2Plots.mm,
+		bottom_margin = 2Plots.mm,
+		top_margin = 3Plots.mm,
+		xlims = [minimum(t), maximum(t)],
+		ylims = [minimum(mu), maximum(mu)])
 
-# 	# integer filling lines
-# 	unzip(a) = map(x->getfield.(a, x), fieldnames(eltype(a)))
-# 	for n in 1:3
-# 		muinds, tinds = map(Tuple, findall(==(1), isapprox.(num_particles, n, atol = 5e-4) .& .! (isapprox.(order_param, 0, atol = 1e-3)))) |> unzip
-# 		plot!(t[tinds], mu[muinds], label = "", lw = 2, c = :black, alpha = 0.8, ls = :dash)
-# 	end
+	# integer filling lines
+	unzip(a) = map(x->getfield.(a, x), fieldnames(eltype(a)))
+	for n in 1:3
+		muinds, tinds = map(Tuple, findall(==(1), isapprox.(num_particles, n, atol = 5e-4) .& .! (isapprox.(order_param, 0, atol = 1e-3)))) |> unzip
+		plot!(t[tinds], mu[muinds], label = "", lw = 2, c = :black, alpha = 0.8, ls = :dash)
+	end
 
-# 	plot!(t[replace([findlast(==(0), order_param[i, :]) for i in 1:size(order_param)[2]], nothing => 1)], mu, label = "Phase boundary", lw = 2, c = 8, alpha = 0.8, legend = :topright, ls = :dash)
+	plot!(t[replace([findlast(==(0), order_param[i, :]) for i in 1:size(order_param)[2]], nothing => 1)], mu, label = "Phase boundary", lw = 2, c = 8, alpha = 0.8, legend = :topright, ls = :dash)
 
-# 	# integer filling labels
-# 	annotate!(0.12, 0.2, text(L"\langle n \rangle = 1", :black, :right, 12))
-# 	annotate!(0.12, 1.15, text(L"\langle n \rangle = 2", :black, :right, 12))
-# 	annotate!(0.12, 2.15, text(L"\langle n \rangle = 3", :black, :right, 12))
+	# integer filling labels
+	annotate!(0.12, 0.2, text(L"\langle n \rangle = 1", :black, :right, 12))
+	annotate!(0.12, 1.15, text(L"\langle n \rangle = 2", :black, :right, 12))
+	annotate!(0.12, 2.15, text(L"\langle n \rangle = 3", :black, :right, 12))
 
-# 	# MI labels
-# 	annotate!(0.02, 0.5, text("MI-1", :white, :right, 12))
-# 	annotate!(0.02, 1.5, text("MI-2", :white, :right, 12))
-# 	annotate!(0.02, 2.5, text("MI-3", :white, :right, 12))
+	# MI labels
+	annotate!(0.02, 0.5, text("MI-1", :white, :right, 12))
+	annotate!(0.02, 1.5, text("MI-2", :white, :right, 12))
+	annotate!(0.02, 2.5, text("MI-3", :white, :right, 12))
 
-# 	# gapped phase
-# 	# scatter!([0.04], [0.4], markersize = 3, c = 3, label = "")
-# 	plot!([0.04, 0.04], [0.1, 0.8], arrow=(:closed, 0.5), c = :grey, lw = 1, label="")
-# 	plot!([0.04, 0.04], [0.8, 0.1], arrow=(:closed, 0.5), c = :grey, lw = 1, label="")
-# 	annotate!(0.048, 0.45, text(L"E_g", :grey, :right, 9))
+	# gapped phase
+	# scatter!([0.04], [0.4], markersize = 3, c = 3, label = "")
+	plot!([0.04, 0.04], [0.1, 0.8], arrow=(:closed, 0.5), c = :grey, lw = 1, label="")
+	plot!([0.04, 0.04], [0.8, 0.1], arrow=(:closed, 0.5), c = :grey, lw = 1, label="")
+	annotate!(0.048, 0.45, text(L"E_g", :grey, :right, 9))
 
-# 	# savefig("MFT.png")
-# end
+	# savefig("MFT.png")
+end
 
 # ╔═╡ ca518357-aa0d-4741-bda1-557c69b67a4b
 # begin
@@ -210,7 +210,7 @@ Plots = "~1.33.0"
 PLUTO_MANIFEST_TOML_CONTENTS = """
 # This file is machine-generated - editing it directly is not advised
 
-julia_version = "1.8.1"
+julia_version = "1.8.0"
 manifest_format = "2.0"
 project_hash = "27b6e9f6cf55c663c5c253d0d9720fc7d8726759"
 
@@ -242,7 +242,7 @@ uuid = "6e34b625-4abd-537c-b88f-471c36dfa7a0"
 version = "1.0.8+0"
 
 [[deps.Cairo_jll]]
-deps = ["Artifacts", "Bzip2_jll", "Fontconfig_jll", "FreeType2_jll", "Glib_jll", "JLLWrappers", "LZO_jll", "Libdl", "Pixman_jll", "Pkg", "Xorg_libXext_jll", "Xorg_libXrender_jll", "Zlib_jll", "libpng_jll"]
+deps = ["Artifacts", "Bzip2_jll", "CompilerSupportLibraries_jll", "Fontconfig_jll", "FreeType2_jll", "Glib_jll", "JLLWrappers", "LZO_jll", "Libdl", "Pixman_jll", "Pkg", "Xorg_libXext_jll", "Xorg_libXrender_jll", "Zlib_jll", "libpng_jll"]
 git-tree-sha1 = "4b859a208b2397a7a623a03449e4636bdb17bcf2"
 uuid = "83423d85-b0ee-5818-9007-b63ccbeb887a"
 version = "1.16.1+1"
@@ -604,9 +604,9 @@ version = "1.42.0+0"
 
 [[deps.Libiconv_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
-git-tree-sha1 = "42b62845d70a619f063a7da093d995ec8e15e778"
+git-tree-sha1 = "c7cb1f5d892775ba13767a87c7ada0b980ea0a71"
 uuid = "94ce4f54-9a6c-5748-9c1c-f9c7231a4531"
-version = "1.16.1+1"
+version = "1.16.1+2"
 
 [[deps.Libmount_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
@@ -827,9 +827,9 @@ uuid = "de0858da-6303-5e67-8744-51eddeeeb8d7"
 
 [[deps.Qt5Base_jll]]
 deps = ["Artifacts", "CompilerSupportLibraries_jll", "Fontconfig_jll", "Glib_jll", "JLLWrappers", "Libdl", "Libglvnd_jll", "OpenSSL_jll", "Pkg", "Xorg_libXext_jll", "Xorg_libxcb_jll", "Xorg_xcb_util_image_jll", "Xorg_xcb_util_keysyms_jll", "Xorg_xcb_util_renderutil_jll", "Xorg_xcb_util_wm_jll", "Zlib_jll", "xkbcommon_jll"]
-git-tree-sha1 = "c6c0f690d0cc7caddb74cef7aa847b824a16b256"
+git-tree-sha1 = "0c03844e2231e12fda4d0086fd7cbe4098ee8dc5"
 uuid = "ea2cea3b-5b76-57ae-a6ef-0a8af62496e1"
-version = "5.15.3+1"
+version = "5.15.3+2"
 
 [[deps.REPL]]
 deps = ["InteractiveUtils", "Markdown", "Sockets", "Unicode"]

@@ -10,6 +10,9 @@ begin
 	using Random, StatsBase, OffsetArrays
 end
 
+# ╔═╡ 005e1b32-b6df-4de2-aa74-7314b7996350
+using JLD
+
 # ╔═╡ 5c89e990-6465-11ed-1052-999c4c6ab206
 function ingredients(path::String)
 	# this is from the Julia source code (evalfile in base/loading.jl)
@@ -38,59 +41,77 @@ begin
 end
 
 # ╔═╡ 47bd514a-5a28-42cb-a0f4-acce20df9086
-# begin
-# 	betas = [1., 2., 4., 8., 16.]
-# 	for (i, beta) in enumerate(betas)
-# 	    op_string = sse.thermalize!(spins, op_string, bonds, beta, n_updates_measure ÷ 10)
-# 	    ns = sse.measure!(spins, op_string, bonds, beta, n_updates_measure; staggered_matrix = sse.generate_staggered_matrix(Lx, Ly))[1]
-# 		push!(ns_list, ns)
-# 		push!(bin_list, 0:length(op_string))
-# 	end
-# end
+begin
+	betas = [1., 2., 4., 8., 16.]
+	for (i, beta) in enumerate(betas)
+	    op_string = sse.thermalize!(spins, op_string, bonds, beta, n_updates_measure ÷ 10)
+	    ns = sse.measure!(spins, op_string, bonds, beta, n_updates_measure; staggered_matrix = sse.generate_staggered_matrix(Lx, Ly))[1]
+		push!(ns_list, ns)
+		push!(bin_list, 0:length(op_string))
+	end
+end
 
 # ╔═╡ d56d2599-af4b-4863-8b61-08f64e921e1f
-# begin
-# 	theme(:dao)
-# 	p = plot(xlabel = "Expansion order, n", ylabel = "Frequency", framestyle = :box, legend = :topright)
-# 	for (i, beta) in enumerate(betas)
-# 		plot!(ns_list[i], bins = bin_list[i], st = :stephist, normalize = true, lab = L"\beta/J = " * "$(beta)", title = "Distribution of expansion order", fillrange = zeros(bin_list[i]), alpha = 0.75)
-# 	end
+begin
+	theme(:dao)
+	p = plot(xlabel = "Expansion order, n", ylabel = "Frequency", framestyle = :box, legend = :topright)
+	for (i, beta) in enumerate(betas)
+		plot!(ns_list[i], bins = bin_list[i], st = :stephist, normalize = true, lab = L"\beta/J = " * "$(beta)", fillrange = zeros(bin_list[i]), alpha = 0.7, lw = 0.75)
+	end
 
-# 	hline!([0], c = :black, lw = 1, lab = "")
-# 	p
-# end
+	hline!([0], c = :black, lw = 1, lab = "", dpi = 300, background = :transparent)
+	# savefig("ndist.png")
+end
 
 # ╔═╡ eacbfac0-f5c7-4ef9-a706-678c3a4e4f51
 begin
-	Ts = range(start = 2., stop = 0., length = 20)[1:(end - 1)]
-	betas = 1 ./ Ts
-	Ls = [4]
-	res = []
+	# Ts = range(start = 1., stop = 0., length = 20)[1:(end - 1)]
+	# betas = 1 ./ Ts
+	# Ls = [8, 16, 24, 32, 48]
+	# res = []
 end
 
 # ╔═╡ 1cbd9bd1-3eba-46e1-8fde-d61c5f161a98
 begin	
-	for L in Ls
-	    println("=" ^ 80)
-	    println("L = ", L)
-	    E = sse.main(L, L, betas)   
-	    push!(res, E)
-	end
+	# for L in Ls
+	#     println("=" ^ 80)
+	#     println("L = ", L)
+	#     E = sse.main(L, L, betas)   
+	#     push!(res, E)
+	# end
 end
+
+# ╔═╡ c3f827c8-bd4c-40d3-af97-f993fd4f3023
+# save("sse.jld", "Ts", Ts, "Ls", Ls, "res", res)
+
+# ╔═╡ fbbe7bb5-aab1-4a61-8ccb-b1343fb8e623
+theme(:dao)
 
 # ╔═╡ 806fc534-176c-4f9d-b29e-3a60a7fb9bef
 begin
 	plot()
+	param = :Xi
 	for (r, L) in zip(res, Ls)
-	    plot!(Ts, getindex.(r, :Cv), yerror = getindex.(r, :dCv), label = "L = $(L)")
+	    plot!(Ts, getindex.(r, param) ./ L^2, yerror = getindex.(r, Symbol("d" * String(param))) ./ L^2 , label = "L = $(L)", ms = 3, st = [:scatter, :line])
 	end
 	
-	plot!(xlim = (0, maximum(1 ./ betas)), xlabel = "temperature T", ylabel = "Avg. energy per site")
+	plot!(xlim = (minimum(Ts), maximum(Ts)), xlabel = "temperature T", ylabel = "$(param) per site")
+end
+
+# ╔═╡ 05c1c272-a558-46b9-b149-1a7621eeef38
+begin
+	plot()
+	for (r, L) in zip(res, Ls)
+	    plot!(Ts, 1 .- getindex.(r, :M4) ./ (3 * (getindex.(r, :M2) .^ 2)), label = "L = $(L)")
+	end
+
+	plot!(xlabel = "temperature T", ylabel = "Binders cumulant")
 end
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
 [deps]
+JLD = "4138dd39-2aa7-5051-a626-17a0bb65d9c8"
 LaTeXStrings = "b964fa9f-0449-5b57-a5c2-d3ea65f4040f"
 OffsetArrays = "6fe1bfb0-de20-5000-8ca7-80f57d26f881"
 Plots = "91a5bcdd-55d7-5caf-9e0b-520d859cae80"
@@ -99,6 +120,7 @@ Random = "9a3f8284-a2c9-5f02-9a11-845980a1fd5c"
 StatsBase = "2913bbd2-ae8a-5f71-8c99-4fb6c76f3a91"
 
 [compat]
+JLD = "~0.13.3"
 LaTeXStrings = "~1.3.0"
 OffsetArrays = "~1.12.8"
 Plots = "~1.36.1"
@@ -112,7 +134,7 @@ PLUTO_MANIFEST_TOML_CONTENTS = """
 
 julia_version = "1.8.0"
 manifest_format = "2.0"
-project_hash = "0a3b37afc70cc7f2ba810120a3cb83d30ae9eb6f"
+project_hash = "425cc6131007e86749531fe9617554a0d0b64289"
 
 [[deps.Adapt]]
 deps = ["LinearAlgebra"]
@@ -135,6 +157,18 @@ git-tree-sha1 = "629c6e4a7be8f427d268cebef2a5e3de6c50d462"
 uuid = "d1d4a3ce-64b1-5f1a-9ba4-7e7e69966f35"
 version = "0.1.6"
 
+[[deps.Blosc]]
+deps = ["Blosc_jll"]
+git-tree-sha1 = "310b77648d38c223d947ff3f50f511d08690b8d5"
+uuid = "a74b3585-a348-5f62-a45c-50e91977d574"
+version = "0.7.3"
+
+[[deps.Blosc_jll]]
+deps = ["Artifacts", "JLLWrappers", "Libdl", "Lz4_jll", "Pkg", "Zlib_jll", "Zstd_jll"]
+git-tree-sha1 = "e94024822c0a5b14989abbdba57820ad5b177b95"
+uuid = "0b7ba130-8d10-5ba8-a3d6-c5182647fed9"
+version = "1.21.2+0"
+
 [[deps.Bzip2_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
 git-tree-sha1 = "19a35467a82e236ff51bc17a3a44b69ef35185a2"
@@ -142,7 +176,7 @@ uuid = "6e34b625-4abd-537c-b88f-471c36dfa7a0"
 version = "1.0.8+0"
 
 [[deps.Cairo_jll]]
-deps = ["Artifacts", "Bzip2_jll", "Fontconfig_jll", "FreeType2_jll", "Glib_jll", "JLLWrappers", "LZO_jll", "Libdl", "Pixman_jll", "Pkg", "Xorg_libXext_jll", "Xorg_libXrender_jll", "Zlib_jll", "libpng_jll"]
+deps = ["Artifacts", "Bzip2_jll", "CompilerSupportLibraries_jll", "Fontconfig_jll", "FreeType2_jll", "Glib_jll", "JLLWrappers", "LZO_jll", "Libdl", "Pixman_jll", "Pkg", "Xorg_libXext_jll", "Xorg_libXrender_jll", "Zlib_jll", "libpng_jll"]
 git-tree-sha1 = "4b859a208b2397a7a623a03449e4636bdb17bcf2"
 uuid = "83423d85-b0ee-5818-9007-b63ccbeb887a"
 version = "1.16.1+1"
@@ -253,6 +287,12 @@ git-tree-sha1 = "74faea50c1d007c85837327f6775bea60b5492dd"
 uuid = "b22a6f82-2f65-5046-a5b2-351ab43fb4e5"
 version = "4.4.2+2"
 
+[[deps.FileIO]]
+deps = ["Pkg", "Requires", "UUIDs"]
+git-tree-sha1 = "7be5f99f7d15578798f338f5433b6c432ea8037b"
+uuid = "5789e2e9-d7fb-5bc7-8068-2c6fae9b9549"
+version = "1.16.0"
+
 [[deps.FileWatching]]
 uuid = "7b1f6079-737a-58dc-b8bc-7a2ca5c1b5ee"
 
@@ -312,9 +352,9 @@ version = "0.21.0+0"
 
 [[deps.Glib_jll]]
 deps = ["Artifacts", "Gettext_jll", "JLLWrappers", "Libdl", "Libffi_jll", "Libiconv_jll", "Libmount_jll", "PCRE2_jll", "Pkg", "Zlib_jll"]
-git-tree-sha1 = "fb83fbe02fe57f2c068013aa94bcdf6760d3a7a7"
+git-tree-sha1 = "d3b3624125c1474292d0d8ed0f65554ac37ddb23"
 uuid = "7746bdde-850d-59dc-9ae8-88ece973131d"
-version = "2.74.0+1"
+version = "2.74.0+2"
 
 [[deps.Graphite2_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
@@ -326,6 +366,24 @@ version = "1.3.14+0"
 git-tree-sha1 = "53bb909d1151e57e2484c3d1b53e19552b887fb2"
 uuid = "42e2da0e-8278-4e71-bc24-59509adca0fe"
 version = "1.0.2"
+
+[[deps.H5Zblosc]]
+deps = ["Blosc", "HDF5"]
+git-tree-sha1 = "d3966da25e48c05c31cd9786fd201627877612a2"
+uuid = "c8ec2601-a99c-407f-b158-e79c03c2f5f7"
+version = "0.1.1"
+
+[[deps.HDF5]]
+deps = ["Compat", "HDF5_jll", "Libdl", "Mmap", "Random", "Requires", "UUIDs"]
+git-tree-sha1 = "3dab31542b3da9f25a6a1d11159d4af8fdce7d67"
+uuid = "f67ccb44-e63f-5c2f-98bd-6dc0ccc4ba2f"
+version = "0.16.14"
+
+[[deps.HDF5_jll]]
+deps = ["Artifacts", "JLLWrappers", "LibCURL_jll", "Libdl", "OpenSSL_jll", "Pkg", "Zlib_jll"]
+git-tree-sha1 = "4cc2bb72df6ff40b055295fdef6d92955f9dede8"
+uuid = "0234f1f7-429e-5d53-9886-15a909be8d59"
+version = "1.12.2+2"
 
 [[deps.HTTP]]
 deps = ["Base64", "CodecZlib", "Dates", "IniFile", "Logging", "LoggingExtras", "MbedTLS", "NetworkOptions", "OpenSSL", "Random", "SimpleBufferStream", "Sockets", "URIs", "UUIDs"]
@@ -358,6 +416,12 @@ version = "0.1.8"
 git-tree-sha1 = "7fd44fd4ff43fc60815f8e764c0f352b83c49151"
 uuid = "92d709cd-6900-40b7-9082-c6be49f344b6"
 version = "0.1.1"
+
+[[deps.JLD]]
+deps = ["Compat", "FileIO", "H5Zblosc", "HDF5", "Printf"]
+git-tree-sha1 = "ec6afa4fd3402e4dd5b15b3e5dd2f7dd52043ce8"
+uuid = "4138dd39-2aa7-5051-a626-17a0bb65d9c8"
+version = "0.13.3"
 
 [[deps.JLFzf]]
 deps = ["Pipe", "REPL", "Random", "fzf_jll"]
@@ -460,9 +524,9 @@ version = "1.42.0+0"
 
 [[deps.Libiconv_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
-git-tree-sha1 = "42b62845d70a619f063a7da093d995ec8e15e778"
+git-tree-sha1 = "c7cb1f5d892775ba13767a87c7ada0b980ea0a71"
 uuid = "94ce4f54-9a6c-5748-9c1c-f9c7231a4531"
-version = "1.16.1+1"
+version = "1.16.1+2"
 
 [[deps.Libmount_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
@@ -500,6 +564,12 @@ deps = ["Dates", "Logging"]
 git-tree-sha1 = "cedb76b37bc5a6c702ade66be44f831fa23c681e"
 uuid = "e6f89c97-d47a-5376-807f-9c37f3926c36"
 version = "1.0.0"
+
+[[deps.Lz4_jll]]
+deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
+git-tree-sha1 = "5d494bc6e85c4c9b626ee0cab05daa4085486ab1"
+uuid = "5ced341a-0733-55b8-9ab6-a4889d929147"
+version = "1.9.3+0"
 
 [[deps.MacroTools]]
 deps = ["Markdown", "Random"]
@@ -1058,6 +1128,10 @@ version = "1.4.1+0"
 # ╠═d56d2599-af4b-4863-8b61-08f64e921e1f
 # ╠═eacbfac0-f5c7-4ef9-a706-678c3a4e4f51
 # ╠═1cbd9bd1-3eba-46e1-8fde-d61c5f161a98
+# ╠═005e1b32-b6df-4de2-aa74-7314b7996350
+# ╠═c3f827c8-bd4c-40d3-af97-f993fd4f3023
+# ╠═fbbe7bb5-aab1-4a61-8ccb-b1343fb8e623
 # ╠═806fc534-176c-4f9d-b29e-3a60a7fb9bef
+# ╠═05c1c272-a558-46b9-b149-1a7621eeef38
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002
