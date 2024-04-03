@@ -1,0 +1,120 @@
+Consider the following situation. We have a degenerate subspace of doubly-occupied ground states and a perturbative hamiltonian, $V = \sum_{ii'\sigma\sigma'} g^{\sigma\sigma'}_{ii'} (d_{i\sigma}^{\dagger}d_{i'\sigma'} + h.c.)$. We are now required to compute matrix elements as follows.
+
+\begin{equation}
+    \bra{\phi}V\ket{\psi} = \sum_{\substack{ii'\\ \sigma\sigma'}} g^{\sigma\sigma'}_{ii'} \bra{0}d_{m'\beta'}d_{m\beta}d_{i\sigma}^{\dagger}d_{i'\sigma'}d_{l\alpha}^{\dagger}d_{l'\alpha'}^{\dagger}\ket{0}
+\end{equation}
+where $\ket{\psi} \equiv d_{l\alpha}^{\dagger}d_{l'\alpha'}^{\dagger}\ket{0}$ and $\ket{\phi} \equiv d_{m\beta}^{\dagger}d_{m'\beta'}^{\dagger}\ket{0}$. Such a general vacuum expectation can be resolved using the rules of Wick contractions\cite{Kvaal15} as shown below.
+
+\begin{equation}
+\wick{
+\c1 d_{m'\beta'} 
+\c2 d_{m\beta} 
+\c1 d_{i\sigma}^{\dagger} 
+\c3 d_{i'\sigma'} 
+\c2 d_{l\alpha}^{\dagger}  
+\c3 d_{l'\alpha'}^{\dagger} 
+}
+\hspace{0.5cm}
+\longrightarrow
+\hspace{0.5cm}
+\delta_{m'i}
+\delta_{\beta'\alpha}
+\delta_{ml}
+\delta_{\beta\alpha}
+\delta_{i'l'}
+\delta_{\sigma'\alpha'}
+\end{equation}
+
+\begin{equation}
+\wick{
+\c1 d_{m'\beta'} 
+\c2 d_{m\beta} 
+\c1 d_{i\sigma}^{\dagger} 
+\c3 d_{i'\sigma'} 
+\c3 d_{l\alpha}^{\dagger}  
+\c2 d_{l'\alpha'}^{\dagger} 
+}
+\hspace{0.5cm}
+\longrightarrow
+\hspace{0.5cm}
+\delta_{m'i}
+\delta_{\beta'\sigma}
+\delta_{ml'}
+\delta_{\beta\alpha'}
+\delta_{i'l}
+\delta_{\sigma'\alpha}
+\end{equation}
+
+\begin{equation}
+\wick{
+\c1 d_{m'\beta'} 
+\c2 d_{m\beta} 
+\c2 d_{i\sigma}^{\dagger} 
+\c3 d_{i'\sigma'} 
+\c1 d_{l\alpha}^{\dagger}  
+\c3 d_{l'\alpha'}^{\dagger} 
+}
+\hspace{0.5cm}
+\longrightarrow
+\hspace{0.5cm}
+\delta_{m'l}
+\delta_{\beta'\alpha}
+\delta_{mi}
+\delta_{\beta\sigma}
+\delta_{i'l'}
+\delta_{\sigma'\alpha'}
+\end{equation}
+
+
+\begin{equation}
+\wick{
+\c1 d_{m'\beta'} 
+\c2 d_{m\beta} 
+\c2 d_{i\sigma}^{\dagger} 
+\c3 d_{i'\sigma'} 
+\c3 d_{l\alpha}^{\dagger}  
+\c1 d_{l'\alpha'}^{\dagger} 
+}
+\hspace{0.5cm}
+\longrightarrow
+\hspace{0.5cm}
+\delta_{m'l'}
+\delta_{\beta'\alpha'}
+\delta_{mi}
+\delta_{\beta\sigma}
+\delta_{i'l}
+\delta_{\sigma'\alpha}
+\end{equation}
+\vspace{0.5cm}\\
+This gives us the following expression for the vacuum expectation value.
+\begin{align}
+    g_{ii'}^{\sigma\sigma'}\bra{0}d_{m'\beta'}d_{m\beta}d^{\dagger}_{i\sigma}d_{i'\sigma'}d^{\dagger}_{l,\alpha}d^{\dagger}_{l'\alpha'}\ket{0} = g_{ii'}^{\sigma\sigma'}(\delta_{m'i}
+    \delta_{\beta'\alpha}
+    \delta_{ml}
+    \delta_{\beta\alpha}
+    \delta_{i'l'}
+    \delta_{\sigma'\alpha'} &+ 
+    \delta_{m'i}
+    \delta_{\beta'\sigma}
+    \delta_{ml'}
+    \delta_{\beta\alpha'}
+    \delta_{i'l}
+    \delta_{\sigma'\alpha}\nonumber\\ 
+    +\delta_{m'l}
+    \delta_{\beta'\alpha}
+    \delta_{mi}
+    \delta_{\beta\sigma}
+    \delta_{i'l'}
+    \delta_{\sigma'\alpha'} &+ 
+    \delta_{m'l'}
+    \delta_{\beta'\alpha'}
+    \delta_{mi}
+    \delta_{\beta\sigma}
+    \delta_{i'l}
+    \delta_{\sigma'\alpha})
+\end{align}
+It then follows that: 
+\begin{align}
+    \bra{\phi}V\ket{\psi} &= g_{m'l'}^{\beta'\alpha'} \delta_{lm}\delta_{\alpha\beta} + g_{m'l}^{\beta'\alpha}\delta_{l'm}\delta_{\alpha'\beta} + g_{ml'}^{\beta\alpha'}\delta_{lm'}\delta_{\alpha\beta'} + g_{ml}^{\beta\alpha} \delta_{l'm'}\delta_{\alpha'\beta'}
+\end{align}
+One can now diagonalize the perturbation in this subspace to obtain the first order energy correction.

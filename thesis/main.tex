@@ -1,0 +1,268 @@
+\documentclass[titlepage]{report}
+\usepackage[fontsize=12pt]{scrextend}
+
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath, amssymb, amscd, amsthm, amsfonts,bm,subcaption,physics,mathtools}
+\usepackage{simpler-wick}
+\usepackage{graphicx}
+\usepackage{bookmark}
+\usepackage{geometry}
+\usepackage{tcolorbox}
+\usepackage{empheq} % for boxed in align environment
+\usepackage{soul} %for wrapping underlines.
+\usepackage{etoolbox}
+\usepackage[thinc]{esdiff} %nice package for writing partial derivatives in thermodynamics
+\usepackage{bm}
+\usepackage[numbers, super, comma, compress]{natbib}
+
+\usepackage{placeins}
+\usepackage[titletoc]{appendix}
+\usepackage{fancyhdr}
+\usepackage{mathpazo} % math font
+\usepackage[explicit]{titlesec}
+\usepackage[tracking=true]{microtype}
+\usepackage{hyperref}
+\usepackage{afterpage}
+
+\newcommand\blankpage{%
+    \null
+    \thispagestyle{empty}%
+    \addtocounter{page}{-1}%
+    \newpage}
+
+\graphicspath{{./images/}}
+\geometry{
+  top=30mm,
+  tmargin=30 mm,  
+  bottom=27mm,
+  bmargin=27 mm,
+  left=25mm,
+  lmargin=25mm, 
+  inner=25mm,
+  right=25mm, 
+  rmargin=25mm,
+  outer=25mm
+} 
+  \definecolor{linkpurple}{RGB}{152,71,155}
+  \definecolor{urlblue}{RGB}{20, 86, 128}
+  \setlength\parindent{0pt}
+
+  \hypersetup
+  {
+    colorlinks=true,
+      linkcolor=urlblue,
+      filecolor=magenta,      
+      urlcolor=linkpurple,
+      citecolor=urlblue
+  }
+
+% \pagestyle{fancy}
+% \fancyhf{}
+% \renewcommand{\headrulewidth}{1pt}
+% \renewcommand{\footrulewidth}{0pt}
+% \renewcommand{\chaptermark}[1]{\markboth{#1}{#1}}
+% \fancyhead[R]{\thepage}
+% \fancyhead[L]{\chaptername\ \thechapter\ --\ \leftmark}
+% \rhead{Exotic Phases of the eBHM}
+% \lhead{Thesis Draft}
+
+% \rfoot{Page \thepage}
+
+
+%for footnotes
+\newcommand{\makefootnotelist}[1]{%
+    \parbox{0.8\textwidth} {%
+        \footnotesize{%
+            \renewcommand*{\do}[1]{##1\\}%
+            \dolistcsloop{#1}}}}%
+
+\setcounter{tocdepth}{1}
+
+\titleformat{\chapter}[block]
+{\SetTracking[no ligatures = {f}]{encoding = *}{40}}%
+{\filright\sffamily\parbox[b][1.6cm][t]{3.5cm}{\MakeUppercase{\large\lsstyle\chaptertitlename} \raisebox{-0.75\height}{\resizebox{!}{1.6cm}{\Huge\thechapter}}}}
+{0ex}%
+{\parbox[b][1.6cm]{\dimexpr\linewidth-3.5cm-1.6pt\relax}{\titlerule[1.5pt] \vspace{2ex}\vfill\endgraf\filright\bfseries\Large#1}}
+
+\newcommand{\subalign}[1]{%
+  \vbox{%
+    \Let@ \restore@math@cr \default@tag
+    \baselineskip\fontdimen10 \scriptfont\tw@
+    \advance\baselineskip\fontdimen12 \scriptfont\tw@
+    \lineskip\thr@@\fontdimen8 \scriptfont\thr@@
+    \lineskiplimit\lineskip
+    \ialign{\hfil$\m@th\scriptstyle##$&$\m@th\scriptstyle{}##$\hfil\crcr
+      #1\crcr
+    }%
+  }%
+}
+
+% set chapter to Chapter in autoref 
+\AtBeginDocument{\def\chapterautorefname{Chapter}}%
+
+\begin{document}
+% TITLE PAGE
+\begin{titlepage}
+
+  \begin{center}
+    \LARGE
+    \textbf{Low-temperature phases \\ of interacting bosons in a lattice}
+
+    \vspace{1cm}
+    \Large
+    \textbf{Akshay Shankar}
+    \vspace{1cm}
+    
+    \large
+    \textit{A dissertation submitted for the partial fulfilment of
+    BS-MS dual degree in Science}
+    
+    \vspace{3.5cm}
+
+    \includegraphics[width=8cm]{IISERLogo.jpg}~\\~\\
+    \large
+    \textbf{Indian Institute of Science Education and Research, Mohali}~\\~\\
+    \large
+    \textbf{May 2023}
+\end{center}
+\end{titlepage}
+\clearpage
+% TITLE PAGE END
+\pagenumbering{Roman}
+
+\begin{center}
+  \textbf{\Large Certificate of Examination}
+\end{center}
+
+This is to certify that the dissertation titled \textbf{Low-temperature phases
+of interacting bosons in a lattice} submitted by \textbf{Akshay Shankar} (Reg. No. MS18117) for the partial fulfillment of BS- MS Dual Degree programme of the institute, has been examined by the thesis committee duly appointed by the institute. The committee finds the work done by the candidate satisfactory and recommends that the report be accepted.
+
+\vspace{4cm}
+
+Prof. Sanjeev Kumar \hspace{1.5cm} Prof. Yogesh Singh \hspace{1.5cm} Prof. Abhishek Chaudhuri
+
+\vspace{4cm}
+
+\begin{flushright}
+  Prof. Sanjeev Kumar
+  \\
+  (Supervisor)
+  \\
+  \vspace{4cm}
+  Dated: 2nd May 2023
+\end{flushright}
+
+\cleardoublepage
+\addtocounter{page}{-1}%
+
+% Declaration.
+\begin{center}
+  \textbf{\Large Declaration}
+\end{center}
+The work presented in this dissertation has been carried out by me under the guidance of Prof. Sanjeev Kumar (supervisor) at the Indian Institute of Science Education and Research, Mohali and Prof. Dr. Tilman Pfau (co-supervisor) at the University of Stuttgart.
+
+\vspace{0.4cm}
+
+This work has not been submitted in part or in full for a degree, a diploma, or a fellowship to any other university or institute. Whenever contributions of others are involved, every effort is made to indicate this clearly, with due acknowledgement of collaborative research and discussions. This thesis is a bonafide record of original work done by me and all sources listed within have been detailed in the bibliography.
+
+\vspace{2cm}
+
+\begin{flushright}
+Akshay Shankar
+\\
+(Candidate)
+\\
+Dated: 2nd May, 2023
+\end{flushright}
+
+In my capacity as the supervisor of the candidates project work, I certify that the above statements by the candidate are true to the best of my knowledge.
+
+\vspace{2cm}
+
+\begin{flushright}
+Prof. Sanjeev Kumar
+\\
+(Supervisor)
+\\
+Dated: 2nd May, 2023
+\end{flushright}
+
+\newpage
+% Acknowledgements.
+\begin{center}
+\textbf{\Large Acknowledgements}
+\end{center}
+\input{chapters/acknowledgement}
+
+\newpage
+% Abstract of the Thesis
+\addcontentsline{toc}{chapter}{\textbf{Abstract}}
+\begin{center}
+  \textbf{\Large Abstract}
+\end{center}
+
+Recent experimental developments in the control and manipulation of individual atoms have made it feasible to probe the rich physics of the Bose-Hubbard model and its extensions. In this thesis, we analyze the ground state phases of some of these models using various numerical techniques. In particular, we study how the phase diagram changes due to the introduction of different kinds of interactions between the bosonic atoms. Finally, we attempt to extend our results beyond the mean-field level.
+
+\restoregeometry
+\addcontentsline{toc}{chapter}{\textbf{List of Figures}}
+\listoffigures
+
+\tableofcontents
+
+\chapter*{Motivation \& Overview}
+\addcontentsline{toc}{section}{Motivation \& Overview}
+\pagenumbering{arabic}
+\input{chapters/chapter01}
+
+\setlength{\headheight}{14.5pt}
+\pagestyle{fancy}
+\fancyhf{}
+\renewcommand{\headrulewidth}{1pt}
+\renewcommand{\footrulewidth}{0pt}
+\renewcommand{\chaptermark}[1]{\markboth{#1}{#1}}
+\fancyhead[R]{\thepage}
+\fancyhead[L]{\chaptername\ \thechapter\ --\ \leftmark}
+\thispagestyle{empty}
+
+\chapter{Quantum mechanics of periodic systems}\label{ch1}
+\input{chapters/chapter02}
+
+\chapter{The Bose-Hubbard model}\label{ch2}
+\input{chapters/chapter03}
+
+\chapter{Solving the Bose-Hubbard model}\label{ch3}
+\input{chapters/chapter04}
+
+\chapter{Dipolar bosons in a lattice}\label{ch4}
+\input{chapters/chapter05}
+
+\chapter{Spinful bosons in a lattice}\label{ch5}
+\input{chapters/chapter06}
+
+\chapter{Boson-mediated interactions}\label{ch6}
+\input{chapters/chapter07}
+
+\chapter{Going beyond the Mean Field}\label{ch7}
+\input{chapters/chapter08}
+
+\chapter{Summary \& Future prospects}\label{ch8}
+\input{chapters/conclusion}
+
+\fancyhead[L]{\appendixname\ \thechapter\ --\ \leftmark}
+
+\begin{appendices}
+\chapter{Implementation details}
+\input{chapters/appendix1}
+\chapter{Diagonalizing spin interactions}\label{app:rotation}
+\input{chapters/appendix2}
+\chapter{Computing vacuum expectations}\label{app:wick}
+\input{chapters/appendix3}
+\end{appendices}
+
+\fancyhead[L]{Bibliography}
+\setcitestyle{numbers}
+% \bibliographystyle{unsrt}
+\bibliographystyle{aipnum4-1}
+\bibliography{./chapters/refs}
+
+\end{document}
