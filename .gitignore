@@ -2,3 +2,7 @@ refs
 *.hdf5
 *.h5
 *.jld
+__pycache__/
+*.pyc
+*.png
+.ipynb_checkpoints
